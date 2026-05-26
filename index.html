@@ -6,52 +6,190 @@
     <title>PharmCNT Web App (LINE OAuth)</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 p-4">
+<body class="bg-slate-50 text-slate-800 antialiased font-sans">
 
-    <div id="loading-screen" class="max-w-md mx-auto text-center py-12">
-        <p class="text-slate-500">กำลังตรวจสอบสิทธิ์ผ่านระบบ LINE...</p>
+    <div id="page-loading" class="max-w-md mx-auto min-h-screen flex flex-col justify-center items-center p-4">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+        <p class="text-slate-500 text-sm font-medium">กำลังตรวจสอบสิทธิ์ผ่านระบบ LINE Login...</p>
     </div>
 
-    <div id="main-app" class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow hidden">
-        <h2 id="welcome-text" class="text-xl font-bold mb-4">ยินดีต้อนรับ</h2>
-        
-        <label class="block text-sm font-medium text-slate-700 mb-1">เลือกเดือนปฏิบัติงาน</label>
-        <select id="monthSelect" class="w-full p-2 border rounded-xl mb-4 bg-gray-50">
-            <option value="พฤษภาคม">พฤษภาคม</option>
-            <option value="มิถุนายน">มิถุนายน</option>
-        </select>
-        
-        <label class="block text-sm font-medium text-slate-700 mb-1">เลือกประเภทเวร</label>
-        <select id="shiftType" class="w-full p-2 border rounded-xl mb-4 bg-gray-50">
-            <option value="ชบด">ชบด</option>
-            <option value="บ่ายน้อย">บ่ายน้อย</option>
-            <option value="SMC">SMC</option>
-        </select>
-        
-        <button class="w-full bg-green-600 text-white py-2 rounded-xl font-bold">ค้นหาคิวเวร</button>
+
+    <div id="page-register" class="max-w-md mx-auto min-h-screen flex flex-col justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
+            <div class="text-center mb-6">
+                <span class="text-5xl">🔑</span>
+                <h2 class="text-xl font-bold text-slate-800 mt-2">ลงทะเบียนผูกสิทธิ์</h2>
+                <p class="text-xs text-slate-500 mt-1">โปรดผูกบัญชี LINE เข้ากับระบบกลุ่มงานเภสัชกรรม</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">1. ประเภทเจ้าหน้าที่</label>
+                    <select id="reg-group" onchange="fetchNamesFromSheet()" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- โปรดระบุประเภท --</option>
+                        <option value="เภสัชกร">เภสัชกร</option>
+                        <option value="เจ้าพนักงานเภสัชกรรม">เจ้าพนักงานเภสัชกรรม</option>
+                        <option value="ลูกจ้าง">ลูกจ้าง</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">2. ชื่อ - สกุล จริงของคุณ</label>
+                    <select id="reg-fullname" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500" disabled>
+                        <option value="">-- กรุณาเลือกประเภทเจ้าหน้าที่ก่อน --</option>
+                    </select>
+                </div>
+                <button onclick="submitRegister()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition mt-2 text-sm">
+                    ✅ ยืนยันการลงทะเบียนเข้าใช้งาน
+                </button>
+            </div>
+        </div>
     </div>
+
+
+    <div id="page-main-menu" class="max-w-md mx-auto p-4 hidden">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xl shadow-inner">
+                💊
+            </div>
+            <div>
+                <h3 id="user-fullname" class="text-base font-bold text-slate-800">กำลังโหลดชื่อ...</h3>
+                <p id="user-role" class="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-0.5">ประเภทบุคลากร</p>
+            </div>
+        </div>
+
+        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">เมนูระบบงาน</h3>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <button onclick="switchPage('page-menu1')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:bg-slate-50 transition">
+                <span class="text-3xl mb-2">🔄</span>
+                <span class="text-sm font-bold text-slate-700">บันทึกแลกเวร</span>
+                <span class="text-xxs text-slate-400 mt-1">แจ้งเปลี่ยนผลัดเวร</span>
+            </button>
+            <button onclick="switchPage('page-menu2')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:bg-slate-50 transition">
+                <span class="text-3xl mb-2">📅</span>
+                <span class="text-sm font-bold text-slate-700">ตารางเวรของฉัน</span>
+                <span class="text-xxs text-slate-400 mt-1">เช็คภาระงานส่วนตัว</span>
+            </button>
+            <button onclick="switchPage('page-menu3')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:bg-slate-50 transition">
+                <span class="text-3xl mb-2">🏥</span>
+                <span class="text-sm font-bold text-slate-700">ภาพรวมตึก</span>
+                <span class="text-xxs text-slate-400 mt-1">ตารางปฏิบัติงานทั้งตึก</span>
+            </button>
+            <button id="btn-admin-panel" onclick="switchPage('page-menu4')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:bg-slate-50 transition hidden">
+                <span class="text-3xl mb-2">🛠️</span>
+                <span class="text-sm font-bold text-slate-700">แผงผู้บริหาร</span>
+                <span class="text-xxs text-slate-400 mt-1">อนุมัติและ Audit สิ้นเดือน</span>
+            </button>
+        </div>
+    </div>
+
+
+    <div id="page-menu1" class="max-w-md mx-auto p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 space-y-4">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2 flex items-center">🔄 ฟอร์มแจ้งขอสลับ/แลกเวร</h3>
+            
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">1. เลือกเดือนปฏิบัติงาน</label>
+                <select id="swap-month" onchange="resetAndLoadShifts()" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium text-blue-600 focus:ring-2 focus:ring-blue-500">
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">2. เลือกประเภทเวร</label>
+                <select id="swap-type" onchange="loadUserAvailableShifts()" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- โปรดเลือกประเภทเวร --</option>
+                    <option value="ชบด">เวร ชบด. (เช้า บ่าย ดึก)</option>
+                    <option value="บ่ายน้อย">เวรบ่ายน้อย</option>
+                    <option value="SMC">เวร SMC (นอกเวลาพิเศษ)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">3. เลือก วัน/เวลา เวรเดิมของคุณ</label>
+                <select id="swap-shift-select" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500" disabled>
+                    <option value="">-- กรุณาเลือกประเภทเวรก่อน --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">4. ผู้ปฏิบัติงานแทน (ผู้รับแลก)</label>
+                <select id="swap-substitute" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- เลือกชื่อผู้ปฏิบัติงานแทน --</option>
+                </select>
+            </div>
+
+            <div class="pt-2 space-y-2">
+                <button onclick="submitShiftExchange()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">
+                    🚀 ส่งบันทึกรายการแลกเวร
+                </button>
+                <button onclick="switchPage('page-main-menu')" class="w-full bg-slate-100 text-slate-600 font-medium py-2.5 rounded-xl text-xs">
+                    ยกเลิกและกลับหน้าหลัก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-menu2" class="max-w-md mx-auto p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 text-center">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">📅 ตารางเวรส่วนตัวของฉัน</h3>
+            <p class="text-sm text-slate-400 mb-4">ระบบดึงรายงานคิวเวรรายบุคคลจาก Google Sheet</p>
+            <button onclick="switchPage('page-main-menu')" class="w-full bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-sm">กลับหน้าหลัก</button>
+        </div>
+    </div>
+
+    <div id="page-menu3" class="max-w-md mx-auto p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 text-center">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">🏥 ตารางรวมกลุ่มงานประจำเดือน</h3>
+            <p class="text-sm text-slate-400 mb-4">แสดงบอร์ดรายชื่อเวรภาพรวมของเจ้าหน้าที่ทั้งหมด</p>
+            <button onclick="switchPage('page-main-menu')" class="w-full bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-sm">กลับหน้าหลัก</button>
+        </div>
+    </div>
+
+    <div id="page-menu4" class="max-w-md mx-auto p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 text-center">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">🛠️ แผงจัดการผู้บริหาร</h3>
+            <p class="text-sm text-slate-400 mb-4">ส่วนอนุมัติการสับเปลี่ยนเวร และรันสรุปยอด Audit ภาระงานสิ้นเดือน</p>
+            <button onclick="switchPage('page-main-menu')" class="w-full bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-sm">กลับหน้าหลัก</button>
+        </div>
+    </div>
+
 
     <script>
-        // ⚙️ ตั้งค่าข้อมูลจาก LINE Developers ของอาจารย์
+        // ⚙️ ตั้งค่าความเชื่อมโยงระบบ (อาจารย์กรอกค่าจริงให้ตรงกันเป๊ะๆ)
+         // ⚙️ ตั้งค่าข้อมูลจาก LINE Developers ของอาจารย์
         const CLIENT_ID = "2010181979"; // ไอดี LINE Login
         const REDIRECT_URI = "https://wisawatp-create.github.io/pharmcnt-shift/index.html"; // หน้าเว็บของอาจารย์
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxj4l0Lou5cV1P9D0eZRv12oAsWW9Fx3OQNv7ZkmSUhjskrXx3H_xCesQyFWSQ7XQsQ/exec";
 
+        let userLineId = "";
+        let myFullName = "";
+        let myGroup = "";
+
+        // ฟังก์ชันสั่งสลับเปิดตา/ปิดตาของแต่ละหน้าจอ (SPA หลีกเลี่ยง Security LINE บล็อก)
+        function switchPage(pageId) {
+            const pages = ['page-loading', 'page-register', 'page-main-menu', 'page-menu1', 'page-menu2', 'page-menu3', 'page-menu4'];
+            pages.forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        // ฟังก์ชันเริ่มรันระบบทันทีเมื่อโหลดหน้าเว็บ
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code'); // ดึงรหัส Authentication Code ที่ LINE ส่งกลับมาให้
+            const code = urlParams.get('code'); // ค้นหาตัวแปรโค้ดที่ LINE ส่งแนบกลับมา
 
             if (!code) {
-                // 🔴 ถ้าเปิดมาแล้วไม่มี code แสดงว่ายังไม่ได้ล็อกอิน ให้เด้งไปหน้า LINE Login ทันที
-                const state = "random_string_12345"; // สตริงป้องกันการปลอมแปลงคิวงาน
+                // 🔴 เคสที่ 1: เปิดเว็บบราวเซอร์ขึ้นมาครั้งแรกแบบไม่มีเซสชัน ให้กระโดดไป LINE Login ทันที
+                const state = "pharmcnt_secure_rand_999";
                 const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}&scope=profile%20openid`;
                 window.location.href = lineLoginUrl;
             } else {
-                // 🟢 ถ้ามี code แล้ว ส่งรหัสนี้ไปให้ GAS หลังบ้านแปลงเป็น LINE User ID จริง
+                // 🟢 เคสที่ 2: ดึง Code ลับจากหน้า LINE กลับมาสำเร็จ ส่งไปแกะหา LINE ID ที่หลังบ้าน GAS
+                initMonthSelector();
                 exchangeCodeForProfile(code);
             }
         };
 
+        // ยิง Fetch API คุยข้ามโดเมนข้ามไปหา GAS เพื่อแลกเปลี่ยนและหาตัวตนจาก LINE
         function exchangeCodeForProfile(code) {
             fetch(GAS_URL, {
                 method: "POST",
@@ -64,16 +202,174 @@
             .then(res => res.json())
             .then(res => {
                 if (res.status === "success") {
-                    // ทำงานสำเร็จ! บดบังหน้าโหลด แล้วแสดงหน้าจอแอปหลัก
-                    document.getElementById('loading-screen').classList.add('hidden');
-                    document.getElementById('main-app').classList.remove('hidden');
+                    userLineId = res.lineUid; // บันทึกรหัสล็อกอินเก็บไว้ในระบบหน้านี้
                     
-                    document.getElementById('welcome-text').innerText = `ผู้ใช้งาน: ${res.fullName} (${res.group})`;
+                    if (res.isRegistered) {
+                        // ประสบความสำเร็จเคยลงทะเบียนมาแล้ว -> ดึงชื่อจริงไปโชว์พาสเข้าเมนูหลัก
+                        myFullName = res.fullName;
+                        myGroup = res.group;
+                        document.getElementById('user-fullname').innerText = res.fullName;
+                        document.getElementById('user-role').innerText = "ประเภทบุคลากร: " + res.group;
+
+                        if (res.isAdmin) {
+                            document.getElementById('btn-admin-panel').classList.remove('hidden'); // ปลดล็อกปุ่มแอดมินให้อาจารย์วิศรุต
+                        }
+                        switchPage('page-main-menu');
+                    } else {
+                        // สมาชิกใหม่เปิดประเดิมระบบครั้งแรก -> สั่งเด้งเปิดหน้าลงทะเบียนเลือกชื่อผูกสิทธิ์
+                        switchPage('page-register');
+                    }
                 } else {
-                    alert("ลงทะเบียนไม่สำเร็จ หรือไม่มีชื่ออยู่ในระบบโรงพยาบาล: " + res.message);
+                    alert("ความผิดพลาดทางระบบสิทธิ์ LINE: " + res.message);
+                }
+            })
+            .catch(err => {
+                alert("เชื่อมต่อหลังบ้าน GAS ล้มเหลว โปรดตรวจสอบสถานะการ Deployment เป็นแบบ Anyone");
+            });
+        }
+
+        // ดึงรายชื่อพนักงานจากแท็บ name_position บนชีทส่งกลับทำตัวเลือก Dropdown
+        function fetchNamesFromSheet() {
+            const group = document.getElementById('reg-group').value;
+            const nameSelect = document.getElementById('reg-fullname');
+            if (!group) return;
+
+            nameSelect.innerHTML = "<option>กำลังติดต่อ Google Sheet ดึงรายชื่อพนักงาน...</option>";
+            nameSelect.disabled = true;
+
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getStaffNamesList", group: group })
+            })
+            .then(res => res.json())
+            .then(data => {
+                nameSelect.innerHTML = '<option value="">-- เลือกชื่อจริงของคุณ --</option>';
+                data.names.forEach(name => {
+                    let opt = document.createElement('option');
+                    opt.value = name;
+                    opt.innerText = name;
+                    nameSelect.appendChild(opt);
+                });
+                nameSelect.disabled = false;
+            });
+        }
+
+        // ยืนยันการลงทะเบียนผูกสิทธิ์ LINE_UID เข้าตาราง User_Registry 
+        function submitRegister() {
+            const group = document.getElementById('reg-group').value;
+            const name = document.getElementById('reg-fullname').value;
+            if (!group || !name) { alert("กรุณาเลือกข้อมูลกลุ่มงานและชื่อจริงให้ครบถ้วนครับ"); return; }
+
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "registerUser", uid: userLineId, name: name, group: group })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === "success") {
+                    alert("ลงทะเบียนผูกสิทธิ์เรียบร้อยระบบทำการรีเฟรชฐานข้อมูลหลักเพื่อเข้าใช้งานครับ");
+                    // รีเซ็ตเพื่อดึงข้อมูลเช็คเข้าหน้าหลักอัติโนมัติ
+                    window.location.href = REDIRECT_URI;
+                }
+            });
+        }
+
+        // คํานวณชื่อเดือนปัจจุบันและเดือนถัดไปใส่ใน Selector คราวละ 2 เดือน
+        function initMonthSelector() {
+            const mSelect = document.getElementById('swap-month');
+            const thMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            const d = new Date();
+            const curMonth = thMonths[d.getMonth()];
+            const nextMDate = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+            const nextMonth = thMonths[nextMDate.getMonth()];
+
+            mSelect.innerHTML = `
+                <option value="${curMonth}">เดือนปัจจุบัน (${curMonth})</option>
+                <option value="${nextMonth}">เดือนถัดไป (${nextMonth})</option>
+            `;
+        }
+
+        function resetAndLoadShifts() {
+            document.getElementById('swap-type').value = "";
+            document.getElementById('swap-shift-select').innerHTML = '<option value="">-- กรุณาเลือกประเภทเวรก่อน --</option>';
+            document.getElementById('swap-shift-select').disabled = true;
+        }
+
+        // โหลดเฉพาะวันเวลาคิวเวรที่เป็นตารางส่วนตัว เพื่อล็อกสิทธิ์ห้ามส่งวันเวลาสลับเวรผิดพลาด
+        function loadUserAvailableShifts() {
+            const month = document.getElementById('swap-month').value;
+            const type = document.getElementById('swap-type').value;
+            const sSelect = document.getElementById('swap-shift-select');
+            const subSelect = document.getElementById('swap-substitute');
+
+            if (!type) return;
+            sSelect.innerHTML = "<option>กำลังกวาดฐานคิวเวรส่วนตัวของคุณ...</option>";
+            sSelect.disabled = true;
+
+            // ดึงรายการเวรที่จองของตัวผู้ล็อกอิน
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getAvailableShifts", sheetName: type, staffName: myFullName, targetMonth: month })
+            })
+            .then(res => res.json())
+            .then(data => {
+                sSelect.innerHTML = '<option value="">-- เลือกรายการวันปฏิบัติงานเดิมของคุณ --</option>';
+                if (data.shifts.length === 0) {
+                    sSelect.innerHTML = '<option value="">❌ เดือนนี้คุณไม่มีเวรปฏิบัติงานประเภทนี้</option>';
+                    return;
+                }
+                data.shifts.forEach(item => {
+                    let opt = document.createElement('option');
+                    opt.value = item.row; // ส่งค่าดัชนีเลขแถวจริง (Row Index) บนหน้าเอ็กเซล
+                    opt.innerText = item.display;
+                    sSelect.appendChild(opt);
+                });
+                sSelect.disabled = false;
+            });
+
+            // โหลดคลังรายชื่อเพื่อนบุคลากรกลุ่มเดียวกันขึ้นแสตนด์บายช่องผู้รับสลับแทน
+            subSelect.innerHTML = "<option>กำลังดึงคลังรายชื่อพนักงานขึ้นทำรายการ...</option>";
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getStaffNamesList", group: myGroup })
+            })
+            .then(res => res.json())
+            .then(data => {
+                subSelect.innerHTML = '<option value="">-- เลือกชื่อผู้ปฏิบัติงานแทน --</option>';
+                data.names.forEach(name => {
+                    if(name !== myFullName) { // ตัดเงื่อนไขป้องกันสลับเวรชนชื่อตัวเอง
+                        let opt = document.createElement('option');
+                        opt.value = name;
+                        opt.innerText = name;
+                        subSelect.appendChild(opt);
+                    }
+                });
+            });
+        }
+
+        // ยืนยันยิงคำสั่งธุรกรรมบันทึกการแลกเวรกลับลงพิกัดพิกัดแถวตารางชีทของ Google
+        function submitShiftExchange() {
+            const type = document.getElementById('swap-type').value;
+            const rowNum = document.getElementById('swap-shift-select').value;
+            const subStaff = document.getElementById('swap-substitute').value;
+
+            if (!type || !rowNum || !subStaff) { alert("กรุณาเลือกองค์ประกอบฟอร์มแลกเวรให้ครบถ้วนด้วยครับ"); return; }
+
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "processShiftExchange", sheetName: type, rowNum: rowNum, substituteStaff: subStaff })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === "success") {
+                    alert("บันทึกการขอสลับแลกเวรสำเร็จ! รายการถูกส่งขึ้นระบบชีทเล่มกลางแล้วครับ");
+                    switchPage('page-main-menu'); // ย้ายพากลับสู่หน้าต่างเมนูหลัก
+                } else {
+                    alert("ระบบฐานข้อมูลคลาดเคลื่อนแจ้งเตือน: " + res.message);
                 }
             });
         }
     </script>
 </body>
 </html>
+
