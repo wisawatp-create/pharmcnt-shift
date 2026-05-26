@@ -318,7 +318,8 @@
             if (!type) return;
             sSelect.innerHTML = "<option>กำลังกวาดฐานคิวเวรในระบบ...</option>";
             sSelect.disabled = true;
-        
+
+            console.log( type , month , myGroup )
             // 1. ยิงดึงข้อมูลเวรทั้งหมดของเดือนจากตารางชีท
             fetch(GAS_URL, {
                 method: "POST",
