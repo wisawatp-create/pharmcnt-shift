@@ -274,18 +274,26 @@
             });
         }
 
-        // คํานวณชื่อเดือนปัจจุบันและเดือนถัดไปใส่ใน Selector คราวละ 2 เดือน
+        // =================================================================
+        // 🔄 ปรับปรุงลอจิกการคำนวณและเลือกเดือนล่วงหน้า 2 เดือนอัตโนมัติ
+        // =================================================================
         function initMonthSelector() {
             const mSelect = document.getElementById('swap-month');
             const thMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            
+            // 1. คำนวณเดือนปัจจุบัน
             const d = new Date();
-            const curMonth = thMonths[d.getMonth()];
+            const curMonthName = thMonths[d.getMonth()];
+            
+            // 2. คำนวณเดือนถัดไป (รองรับการข้ามปีอัตโนมัติ เช่น ธันวาคม -> มกราคม)
             const nextMDate = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-            const nextMonth = thMonths[nextMDate.getMonth()];
-
+            const nextMonthName = thMonths[nextMDate.getMonth()];
+        
+            // 3. ยัดรายชื่อเดือนลงใน Dropdown HTML
+            // ระบบจะส่งชื่อเดือนตัวเปล่า (เช่น "พฤษภาคม") ข้ามไปเป็น Keyword คัดกรองใน GAS ทันที
             mSelect.innerHTML = `
-                <option value="${curMonth}">เดือนปัจจุบัน (${curMonth})</option>
-                <option value="${nextMonth}">เดือนถัดไป (${nextMonth})</option>
+                <option value="${curMonthName}">เดือนปัจจุบัน (${curMonthName})</option>
+                <option value="${nextMonthName}">เดือนถัดไป (${nextMonthName})</option>
             `;
         }
 
