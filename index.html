@@ -407,6 +407,7 @@
         // 🔑 2. ฟังก์ชันใหม่: ปลดล็อกช่องผู้รับแลก + คัดกรองชื่อซ้ำซ้อนขั้นสูง
         // =================================================================
         function unlockAndLoadSubstitute(monthText, selectedShiftText) {
+            console.log(monthText, selectedShiftText);
             const subSelect = document.getElementById('swap-substitute');
             
             if (!selectedShiftText || selectedShiftText.includes("-- เลือกรายการวันปฏิบัติงาน")) {
