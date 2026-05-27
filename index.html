@@ -332,18 +332,33 @@
             })
             .then(res => res.json())
             .then(data => {
+                // ให้ดึงตัวแปร data มาใช้งานโดยตรง ไม่ต้องผ่าน .shifts
+                 const shiftsList = (data && data.shifts) ? data.shifts : data;
+                // ล้างค่า Dropdown เป็นค่าเริ่มต้น
                 sSelect.innerHTML = '<option value="">-- เลือกรายการวันปฏิบัติงานในตาราง --</option>';
-                if (data.shifts.length === 0) {
+
+                //  เช็คว่าข้อมูลที่ส่งมาเป็น Array ไหม และมีข้อมูลข้างในหรือไม่
+                if (!Array.isArray(shiftsList) || shiftsList.length === 0) {
                     sSelect.innerHTML = '<option value="">❌ เดือนนี้ไม่มีข้อมูลเวรประเภทนี้ในระบบ</option>';
+                    sSelect.disabled = true; // ล็อกปุ่มไว้หากไม่มีข้อมูล
                     return;
                 }
-                data.shifts.forEach(item => {
+
+                // ลูปป้อนข้อมูลลง Dropdown (ใช้ชื่อคีย์ item.row และ item.display พิมพ์เล็กตรงเป๊ะ)
+                shiftsList.forEach(item => {
                     let opt = document.createElement('option');
-                    opt.value = item.row;
-                    opt.innerText = item.display;
+                    opt.value = item.row;         // พิมพ์เล็กตรงตามโครงสร้าง GAS
+                    opt.innerText = item.display; // พิมพ์เล็กตรงตามโครงสร้าง GAS
                     sSelect.appendChild(opt);
                 });
-                sSelect.disabled = false;
+
+                // ปลดล็อก Dropdown ให้เจ้าหน้าที่กดเลือกได้สำเร็จ
+                sSelect.disabled = false;                
+            })
+            .catch(err => {
+                // ดักจับกรณีแกะโค้ดพลาด จะได้รู้ว่าพังเพราะอะไร
+                console.error("🔴 เกิดข้อผิดพลาดฝั่ง HTML:", err);
+                sSelect.innerHTML = `<option value="">❌ ระบบขัดข้อง: ${err.message}</option>`;
             });
         
             // 2. ควบคุมโลจิกช่อง "ผู้ปฏิบัติงานแทน" (Dropdown ช่องที่ 4)
