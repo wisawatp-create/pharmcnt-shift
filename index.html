@@ -367,40 +367,7 @@
                 sSelect.innerHTML = `<option value="">❌ ระบบขัดข้อง: ${err.message}</option>`;
             });
         
-            // 2. ควบคุมโลจิกช่อง "ผู้ปฏิบัติงานแทน" (Dropdown ช่องที่ 4)
-            subSelect.innerHTML = ""; // ล้างค่าเดิมก่อน
             
-            if (monthText.indexOf("เดือนถัดไป") !== -1) {
-                // 🔵 เคสเดือนหน้า: บังคับล็อกสิทธิ์เป็น "**ขึ้นปฏิบัติงานเอง**" เท่านั้น
-                let opt = document.createElement('option');
-                opt.value = "**ขึ้นปฏิบัติงานเอง**";
-                opt.innerText = "**ขึ้นปฏิบัติงานเอง**";
-                subSelect.appendChild(opt);
-                subSelect.disabled = true; // ล็อกไม่ให้คลิกเลือกเปลี่ยนเป็นชื่อคนอื่น
-            } else {
-                // 🟢 เคสเดือนปัจจุบัน: ดึงรายชื่อเฉพาะเจ้าหน้าที่ในกลุ่ม และตัดชื่อตัวเองออก
-                subSelect.disabled = true;
-                subSelect.innerHTML = "<option>กำลังดึงรายชื่อเฉพาะในกลุ่มงาน...</option>";
-                
-                fetch(GAS_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "getStaffNamesList", group: myGroup })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    subSelect.innerHTML = '<option value="">-- เลือกชื่อผู้ปฏิบัติงานแทน --</option>';
-                    data.names.forEach(name => {
-                        // 🔒 เงื่อนไขสำคัญ: ต้องไม่ตรงกับชื่อของผู้ที่กำลังล็อกอินอยู่ (myFullName)
-                        if (name !== myFullName) { 
-                            let opt = document.createElement('option');
-                            opt.value = name;
-                            opt.innerText = name;
-                            subSelect.appendChild(opt);
-                        }
-                    });
-                    subSelect.disabled = false; // ปลดล็อกให้เลือกเพื่อนในกลุ่มได้
-                });
-            }
         }
 
         // =================================================================
