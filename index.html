@@ -332,6 +332,7 @@
             })
             .then(res => res.json())
             .then(data => {
+                console.log(data)
                 // ให้ดึงตัวแปร data มาใช้งานโดยตรง ไม่ต้องผ่าน .shifts
                  const shiftsList = (data && data.shifts) ? data.shifts : data;
                 // ล้างค่า Dropdown เป็นค่าเริ่มต้น
