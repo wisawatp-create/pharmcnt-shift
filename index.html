@@ -419,6 +419,7 @@
                     // 🔒 ดักจับมาตรการความปลอดภัย 2 ชั้น:
                     // ชั้นที่ 1: ต้องไม่ใช่ชื่อของตัวผู้ล็อกอินเอง (myFullName)
                     // ชั้นที่ 2: ต้องไม่ใช่ชื่อของเจ้าของเวรเดิมที่ระบุอยู่บนแถวนั้น (originalStaffName)
+                    console.log(compareCleanName ,compareOriginalName)
                     if (compareCleanName !== compareOriginalName) { 
                         let opt = document.createElement('option');
                         opt.value = cleanName;
