@@ -431,6 +431,10 @@
             let originalStaffName = "";
             if (selectedShiftText.includes(" - ")) {
                 originalStaffName = selectedShiftText.split(" - ")[1].trim();
+
+                // 🔥 [จุดแก้ไขวิกฤตที่ 1] ลบเว้นวรรคทุกจุดในชื่อเดิมออกให้หมด (รวมถึงเว้นวรรคตรงกลางชื่อ-สกุล)
+                // เช่น "นายอภินันท์    เทศธรรม" จะกลายเป็น "นายอภินันท์เทศธรรม"
+                compareOriginalName = originalStaffName.replace(/\s+/g, '');
             }
         
             fetch(GAS_URL, {
@@ -443,11 +447,12 @@
                 
                 data.names.forEach(name => {
                     const cleanName = name.trim();
+                    const compareCleanName = cleanName.replace(/\s+/g, '');
                     
                     // 🔒 ดักจับมาตรการความปลอดภัย 2 ชั้น:
                     // ชั้นที่ 1: ต้องไม่ใช่ชื่อของตัวผู้ล็อกอินเอง (myFullName)
                     // ชั้นที่ 2: ต้องไม่ใช่ชื่อของเจ้าของเวรเดิมที่ระบุอยู่บนแถวนั้น (originalStaffName)
-                    if (cleanName !== myFullName.trim() && cleanName !== originalStaffName) { 
+                    if (compareCleanName !== compareOriginalName) { 
                         let opt = document.createElement('option');
                         opt.value = cleanName;
                         opt.innerText = cleanName;
