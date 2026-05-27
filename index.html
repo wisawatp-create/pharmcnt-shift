@@ -354,7 +354,12 @@
                 });
 
                 // ปลดล็อก Dropdown ให้เจ้าหน้าที่กดเลือกได้สำเร็จ
-                sSelect.disabled = false;                
+                sSelect.disabled = false;    
+
+                // 🔥 ผูกเหตุการณ์เพิ่ม: เมื่อเจ้าหน้าที่คลิกเลือกแถวเวรในข้อ 3 แล้ว ให้วิ่งไปปลดล็อกข้อ 4 อัตโนมัติ
+                sSelect.onchange = function() {
+                    unlockAndLoadSubstitute(monthText, this.options[this.selectedIndex].text);
+                };
             })
             .catch(err => {
                 // ดักจับกรณีแกะโค้ดพลาด จะได้รู้ว่าพังเพราะอะไร
@@ -396,6 +401,64 @@
                     subSelect.disabled = false; // ปลดล็อกให้เลือกเพื่อนในกลุ่มได้
                 });
             }
+        }
+
+        // =================================================================
+        // 🔑 2. ฟังก์ชันใหม่: ปลดล็อกช่องผู้รับแลก + คัดกรองชื่อซ้ำซ้อนขั้นสูง
+        // =================================================================
+        function unlockAndLoadSubstitute(monthText, selectedShiftText) {
+            const subSelect = document.getElementById('swap-substitute');
+            
+            if (!selectedShiftText || selectedShiftText.includes("-- เลือกรายการวันปฏิบัติงาน")) {
+                subSelect.innerHTML = '<option value="">-- กรุณาเลือกรายการวันปฏิบัติงานในข้อ 3 ก่อน --</option>';
+                subSelect.disabled = true;
+                return;
+            }
+        
+            // 🔵 เงื่อนไขที่ 1: ถ้าเป็น "เดือนถัดไป" บังคับล็อกขึ้นปฏิบัติงานเองทันที
+            if (monthText.indexOf("เดือนถัดไป") !== -1) {
+                subSelect.innerHTML = '<option value="**ขึ้นปฏิบัติงานเอง**">**ขึ้นปฏิบัติงานเอง**</option>';
+                subSelect.disabled = true;
+                return;
+            }
+        
+            // 🟢 เงื่อนไขที่ 2: ถ้าเป็น "เดือนปัจจุบัน" ทำการแกะชื่อเจ้าของเวรเดิมเพื่อตัดสิทธิ์ชื่อซ้ำ
+            subSelect.innerHTML = "<option>กำลังดึงรายชื่อเฉพาะในกลุ่มงาน...</option>";
+            subSelect.disabled = true;
+        
+            // 🔍 แกะรอยหาชื่อเจ้าของเวรเดิมจากข้อความ Display (เช่น "1 พ.ค. [ชบด] - นายอภินันท์" -> แกะได้ "นายอภินันท์")
+            let originalStaffName = "";
+            if (selectedShiftText.includes(" - ")) {
+                originalStaffName = selectedShiftText.split(" - ")[1].trim();
+            }
+        
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getStaffNamesList", group: myGroup })
+            })
+            .then(res => res.json())
+            .then(data => {
+                subSelect.innerHTML = '<option value="">-- เลือกชื่อผู้ปฏิบัติงานแทน --</option>';
+                
+                data.names.forEach(name => {
+                    const cleanName = name.trim();
+                    
+                    // 🔒 ดักจับมาตรการความปลอดภัย 2 ชั้น:
+                    // ชั้นที่ 1: ต้องไม่ใช่ชื่อของตัวผู้ล็อกอินเอง (myFullName)
+                    // ชั้นที่ 2: ต้องไม่ใช่ชื่อของเจ้าของเวรเดิมที่ระบุอยู่บนแถวนั้น (originalStaffName)
+                    if (cleanName !== myFullName.trim() && cleanName !== originalStaffName) { 
+                        let opt = document.createElement('option');
+                        opt.value = cleanName;
+                        opt.innerText = cleanName;
+                        subSelect.appendChild(opt);
+                    }
+                });
+                
+                subSelect.disabled = false; // 🔓 ปลดล็อกให้กดเลือกชื่อเพื่อนได้สำเร็จอย่างปลอดภัย
+            })
+            .catch(err => {
+                subSelect.innerHTML = `<option value="">❌ โหลดรายชื่อล้มเหลว</option>`;
+            });
         }
 
         // ยืนยันยิงคำสั่งธุรกรรมบันทึกการแลกเวรกลับลงพิกัดพิกัดแถวตารางชีทของ Google
