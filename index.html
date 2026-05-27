@@ -332,9 +332,9 @@
             })
             .then(res => res.json())
             .then(data => {
-                console.log(data)
+                console.log(data.shifts)
                 // ให้ดึงตัวแปร data มาใช้งานโดยตรง ไม่ต้องผ่าน .shifts
-                 const shiftsList = (data && data.shifts) ? data.shifts : data;
+                 const shiftsList = data.shifts;
                 // ล้างค่า Dropdown เป็นค่าเริ่มต้น
                 sSelect.innerHTML = '<option value="">-- เลือกรายการวันปฏิบัติงานในตาราง --</option>';
 
