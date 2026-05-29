@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบจัดการเวร PharmCNT</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         /* ตกแต่งฟอนต์พื้นฐานเพื่อให้แสดงผลภาษาไทยได้อย่างละมุนบนหน้าจอมือถือ */
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
@@ -33,8 +34,68 @@
 
         // 🚀 สั่งเปิดระบบให้โหลดหน้าแรก (home.html) ทันทีที่เปิดแอปพลิเคชัน
         window.addEventListener('DOMContentLoaded', () => {
+            initializeLiff();
+        });
+
+        // 🟢 [ท่อนสคริปต์เรียก LINE Login] 
+    function initializeLiff() {
+        // นำค่า LIFF ID จากหน้าแผง LINE Developers ของอาจารย์มาหยอดใส่ตรงนี้
+        liff.init({ liffId: "YOUR_LIFF_ID_HERE" }) 
+            .then(() => {
+                // เช็คว่าเจ้าหน้าที่คนนี้ได้ทำการ Login ผ่าน LINE แล้วหรือยัง?
+                if (!liff.isLoggedIn()) {
+                    // 🚪 ถ้ายังไม่ได้ล็อกอิน ให้เด้งเปิดประตูหน้าต่าง LINE Login ครอบหน้าจอทันที
+                    liff.login();
+                } else {
+                    // 🎉 ถ้าผ่านด่านสแกนเรียบร้อยแล้ว ให้ไปดึงชื่อจริงมาใช้งาน
+                    getUserLineProfile();
+                }
+            })
+            .catch((err) => {
+                console.error("🔴 LINE LIFF เริ่มต้นระบบล้มเหลว:", err);
+                // แผนสำรอง: หากเปิดบนคอมพิวเตอร์แล้วไม่ได้เชื่อม LINE ให้ยอมเปิดหน้าแรกข้ามไปก่อนได้เพื่อเทสระบบ
+                myFullName = "นายวิศรุต ปาริยะประเสริฐ";
+                myGroup = "เภสัชกร";
+                switchPage('home');
+            });
+    }
+
+    // 👤 ฟังก์ชันแกะกล่องประวัติพนักงานจากเซิร์ฟเวอร์ LINE
+    function getUserLineProfile() {
+        liff.getProfile()
+            .then(profile => {
+                // 🔄 นำชื่อจริงภาษาไทยในไลน์ ยัดใส่โถตัวแปรส่วนกลางของอาจารย์อัตโนมัติ!
+                myFullName = profile.displayName; 
+                
+                // หลังจากได้ชื่อไลน์พนักงานแล้ว ค่อยสั่งวิ่งไปดึงข้อมูลระบุกลุ่มงาน (เภสัชกร/เจ้าพนักงาน) จาก GAS
+                fetchUserGroupFromBackend(myFullName);
+            })
+            .catch(err => {
+                console.error("🔴 ไม่สามารถดึง Profile จาก LINE ได้:", err);
+                switchPage('home'); // ข้ามไปแบบเซฟๆ
+            });
+    }
+
+    // 🔍 ฟังก์ชันพิเศษ: เอาชื่อไลน์ไปควานหา "กลุ่มงาน" ใน Sheet name_position ล่าสุด
+    function fetchUserGroupFromBackend(fullName) {
+        fetch(GAS_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "checkUserGroup", staffName: fullName })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // ยัดค่ากลุ่มงานที่แสกนเจอ เช่น "เภสัชกร" หรือ "เจ้าพนักงานเภสัชกรรม" เข้าตัวแปรส่วนกลาง
+            myGroup = data.group || "เภสัชกร"; 
+            
+            // เมื่อตัวแปรครบถ้วนสมบูรณ์แล้ว จึงเปิดสิทธิ์ปล่อยตัวให้พนักงานเข้าสู่หน้าหลักอย่างปลอดภัยครับ
+            switchPage('home');
+        })
+        .catch(err => {
+            console.error("🔴 แสกนหาคลังกลุ่มงานไม่สำเร็จ:", err);
+            myGroup = "เภสัชกร"; // ค่า Fallback ป้องกันระบบค้าง
             switchPage('home');
         });
+    }
 
         // 🔄 ฟังก์ชันอัจฉริยะสำหรับดูดไฟล์ HTML ข้ามฝั่งมาเปิดสลับแสดงผลบนหน้าจอ
         function switchPage(pageName) {
