@@ -353,6 +353,44 @@
                 listContainer.appendChild(rowDiv);
             });
         }
+        // =======================================================
+        // 📅 ฟังก์ชันคำนวณเดือนปัจจุบันและเดือนถัดไปแบบอัตโนมัติ (Dynamic Month Setup)
+        // =======================================================
+        function setupDynamicMonths() {
+            const monthSelect = document.getElementById('swap-month');
+            if (!monthSelect) return; // ป้องกันบั๊ก Null หากหน้าจอเดินทางมาไม่ถึง
+        
+            const thMonths = [
+                "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+                "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+            ];
+        
+            // 1. ดึงวันเวลาปัจจุบันจากระบบเครื่องผู้ใช้งาน
+            const now = new Date();
+            const currentMonthIdx = now.getMonth(); // 0 = ม.ค. , 11 = ธ.ค.
+            const currentYearBE = now.getFullYear() + 543; // แปลง ค.ศ. เป็น พ.ศ.
+        
+            // 2. คำนวณหาเดือนถัดไป (ดักบั๊กกรณีข้ามปี: ถ้าปัจจุบันเป็น ธ.ค. เดือนถัดไปจะเป็น ม.ค. ปีถัดไป)
+            let nextMonthIdx = currentMonthIdx + 1;
+            let nextYearBE = currentYearBE;
+            if (nextMonthIdx > 11) {
+                nextMonthIdx = 0;
+                nextYearBE += 1;
+            }
+        
+            // 3. จัดแจงโครงสร้าง Option ประกอบร่างภาษาไทย
+            const currentMonthText = `${thMonths[currentMonthIdx]}`;
+            const currentMonthDisplay = `${thMonths[currentMonthIdx]} ${currentYearBE} (เดือนปัจจุบัน)`;
+        
+            const nextMonthText = `${thMonths[nextMonthIdx]}`;
+            const nextMonthDisplay = `${thMonths[nextMonthIdx]} ${nextYearBE} (เดือนถัดไป)`;
+        
+            // 4. พ่นข้อมูลลงสู่ Dropdown บนหน้าฟอร์ม
+            monthSelect.innerHTML = `
+                <option value="${currentMonthText}" selected>${currentMonthDisplay}</option>
+                <option value="${nextMonthText}">${nextMonthDisplay}</option>
+            `;
+        }
     </script>
 </body>
 </html>
