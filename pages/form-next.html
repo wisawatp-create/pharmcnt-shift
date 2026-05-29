@@ -1,0 +1,38 @@
+<div class="bg-slate-50 min-h-screen p-4 flex flex-col justify-between">
+    
+    <div>
+        <div class="flex items-center space-x-2 mb-6">
+            <button id="btn-back" class="p-2.5 bg-white active:bg-slate-100 rounded-2xl shadow-sm text-slate-600 transform active:scale-95 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <div>
+                <h2 class="text-base font-bold text-slate-800">📝 บันทึกเวรล่วงหน้า</h2>
+                <p class="text-xs text-slate-400">ลงชื่อเปิดตารางจองเวรสำหรับเดือนถัดไป</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-5">
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">1. เดือนปฏิบัติงาน</label>
+                <div class="w-full p-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-semibold text-slate-700 flex items-center justify-between">
+                    <span id="display-next-month">มิถุนายน 2569 (เดือนหน้า)</span>
+                    <span class="text-emerald-500 bg-emerald-50 px-2.5 py-0.5 rounded-lg text-[10px] font-bold">Auto</span>
+                </div>
+                <input type="hidden" id="swap-month" value="มิถุนายน">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">2. เลือกประเภทเวร</label>
+                <select id="swap-type" class="w-full p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-sm font-medium text-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                    <option value="">-- เลือกประเภทเวร --</option>
+                    <option value="ชบด">เช้า (ชบด)</option>
+                    <option value="บ่ายน้อย">บ่ายน้อย</option>
+                    <option value="SMC">นอกเวลา SMC</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-4
