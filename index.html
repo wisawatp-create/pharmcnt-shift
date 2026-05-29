@@ -61,87 +61,85 @@
                 });
         }
 
-        // =======================================================
-        // 🧠 ฟังก์ชันศูนย์รวมลอจิก: ผูกพฤติกรรมปุ่มหลังจากแยกหน้าจอแล้ว
+       
+       // =======================================================
+        // 🧠 ปรับปรุงฟังก์ชันศูนย์รวมลอจิก (ฉบับปลอดภัย ป้องกัน Null Property)
         // =======================================================
         function initPageLogic(pageName) {
             
             // 🏠 เคสหน้าจอหลัก (Home / Dashboard)
             if (pageName === 'home') {
-                document.getElementById('btn-goto-next').onclick = () => switchPage('form-next');
-                document.getElementById('btn-goto-now').onclick = () => switchPage('form-now');
-                document.getElementById('btn-goto-overview').onclick = () => switchPage('overview');
+                const btnNext = document.getElementById('btn-goto-next');
+                const btnNow = document.getElementById('btn-goto-now');
+                const btnOverview = document.getElementById('btn-goto-overview');
+        
+                // 🔒 ตรวจสอบความปลอดภัย: ถ้าปุ่มเดินทางมาถึง DOM หน้าจอครบแล้ว ค่อยผูกคำสั่ง onclick
+                if (btnNext) btnNext.onclick = () => switchPage('form-next');
+                if (btnNow) btnNow.onclick = () => switchPage('form-now');
+                if (btnOverview) btnOverview.onclick = () => switchPage('overview');
             }
             
             // 🟢 เคสงานบันทึกเวรล่วงหน้า (เดือนหน้า)
             if (pageName === 'form-next') {
-                document.getElementById('btn-back').onclick = () => switchPage('home');
-                
+                const btnBack = document.getElementById('btn-back');
                 const typeSelect = document.getElementById('swap-type');
-                const submitBtn = document.getElementById('btn-submit-next');
-                
-                // เมื่อเลือกประเภทเวร ให้ไปดึงคิวเวรในชีทล่วงหน้ามาแสตนด์บาย
-                typeSelect.onchange = function() {
-                    loadUserAvailableShifts('form-next');
-                };
-                
-                // ดักจับจังหวะการเปิดล็อกปุ่มบันทึก
-                document.getElementById('swap-shift-select').onchange = function() {
-                    if (this.value !== "") {
-                        submitBtn.disabled = false;
-                        submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-4 rounded-2xl shadow-lg transform active:scale-[0.99] transition-all flex items-center justify-center space-x-2";
-                    } else {
-                        submitBtn.disabled = true;
-                        submitBtn.className = "w-full bg-slate-300 text-slate-500 font-bold p-4 rounded-2xl cursor-not-allowed flex items-center justify-center space-x-2";
-                    }
-                };
+                const shiftSelect = document.getElementById('swap-shift-select');
+        
+                if (btnBack) btnBack.onclick = () => switchPage('home');
+                if (typeSelect) {
+                    typeSelect.onchange = function() {
+                        loadUserAvailableShifts('form-next');
+                    };
+                }
+                if (shiftSelect) {
+                    shiftSelect.onchange = function() {
+                        const submitBtn = document.getElementById('btn-submit-next');
+                        if (!submitBtn) return;
+                        if (this.value !== "") {
+                            submitBtn.disabled = false;
+                            submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-4 rounded-2xl shadow-lg transform active:scale-[0.99] transition-all flex items-center justify-center space-x-2";
+                        } else {
+                            submitBtn.disabled = true;
+                            submitBtn.className = "w-full bg-slate-300 text-slate-500 font-bold p-4 rounded-2xl cursor-not-allowed flex items-center justify-center space-x-2";
+                        }
+                    };
+                }
             }
-
+        
             // 🔵 เคสงานจัดการ/เปลี่ยนผลัดเวร (เดือนปัจจุบัน)
             if (pageName === 'form-now') {
-                document.getElementById('btn-back').onclick = () => switchPage('home');
-                
+                const btnBack = document.getElementById('btn-back');
                 const typeSelect = document.getElementById('swap-type');
-                const subSelect = document.getElementById('swap-substitute');
-                const submitBtn = document.getElementById('btn-submit-now');
                 
-                // เมื่อเปลี่ยนประเภทเวร ให้ยิงกวาดคิวเวรเดือนปัจจุบันมาเรนเดอร์ในข้อ 3
-                typeSelect.onchange = function() {
-                    loadUserAvailableShifts('form-now');
-                };
-                
-                // ดักจับช่องข้อ 4 (ผู้รับแลก) ถ้ากรอกครบถ้วนจึงจะยอมให้เปิดล็อกปุ่มส่งข้อมูล
-                subSelect.onchange = function() {
-                    if (this.value !== "") {
-                        submitBtn.disabled = false;
-                        submitBtn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-4 rounded-2xl shadow-lg transform active:scale-[0.99] transition-all flex items-center justify-center space-x-2";
-                    } else {
-                        submitBtn.disabled = true;
-                        submitBtn.className = "w-full bg-slate-300 text-slate-500 font-bold p-4 rounded-2xl cursor-not-allowed flex items-center justify-center space-x-2";
-                    }
-                };
+                if (btnBack) btnBack.onclick = () => switchPage('home');
+                if (typeSelect) {
+                    typeSelect.onchange = function() {
+                        loadUserAvailableShifts('form-now');
+                    };
+                }
             }
-
+        
             // 🟠 เคสหน้าจอภาพรวมตารางรวมเดือน (มินิปฏิทินจุดสี)
             if (pageName === 'overview') {
-                document.getElementById('btn-back-home').onclick = () => switchPage('home');
+                const btnBackHome = document.getElementById('btn-back-home');
+                if (btnBackHome) btnBackHome.onclick = () => switchPage('home');
                 
-                // โหลดประมวลผลข้อมูลเวรดิบภาพรวมรอบแรก
+                // รันฟังก์ชันดึงฐานข้อมูลภาพรวมมาเรนเดอร์จุดสี
                 fetchOverviewDataAndRender();
                 
-                // ผูกสิทธิ์และพฤติกรรมสลับแท็บเม็ดยา 3 ประเภทเวร
+                // ผูกสิทธิ์แท็บเม็ดยา 3 ประเภทเวร
                 const tabs = document.querySelectorAll('.tab-filter');
-                tabs.forEach(tab => {
-                    tab.onclick = function() {
-                        tabs.forEach(t => {
-                            t.className = "tab-filter text-slate-600 font-medium py-2.5 px-1 rounded-xl text-xs text-center transition-all duration-150";
-                        });
-                        this.className = "tab-filter bg-white text-indigo-700 font-bold py-2.5 px-1 rounded-xl text-xs text-center shadow-sm transition-all duration-150";
-                        
-                        // สั่งวาดปฏิทินจุดสีเด้งตอบสนองใหม่ทันทีตามแท็บที่กด
-                        renderCalendarGrid(this.innerText.trim());
-                    };
-                });
+                if (tabs.length > 0) {
+                    tabs.forEach(tab => {
+                        tab.onclick = function() {
+                            tabs.forEach(t => {
+                                t.className = "tab-filter text-slate-600 font-medium py-2.5 px-1 rounded-xl text-xs text-center transition-all duration-150";
+                            });
+                            this.className = "tab-filter bg-white text-indigo-700 font-bold py-2.5 px-1 rounded-xl text-xs text-center shadow-sm transition-all duration-150";
+                            renderCalendarGrid(this.innerText.trim());
+                        };
+                    });
+                }
             }
         }
 
