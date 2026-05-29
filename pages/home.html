@@ -1,0 +1,42 @@
+<div class="bg-slate-50 min-h-screen p-4 flex flex-col justify-between">
+    
+    <div>
+        <div class="bg-gradient-to-br from-blue-700 to-indigo-800 p-5 rounded-3xl text-white shadow-lg mb-6 relative overflow-hidden">
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+            
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide">ระบบจัดการเวร PharmCNT</h1>
+                    <p class="text-xs text-indigo-200 font-light mt-0.5">กลุ่มงานเภสัชกรรม โรงพยาบาลชัยนาทนเรนทร</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            
+            <button id="btn-goto-next" class="w-full bg-white active:bg-slate-100 p-4 rounded-2xl shadow-sm border border-slate-100 text-left font-bold flex justify-between items-center transform active:scale-[0.98] transition-all duration-100 group">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-emerald-100 text-emerald-600 p-3 rounded-xl group-active:bg-emerald-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </div>
+                    <div>
+                        <span class="block text-slate-800 text-sm font-semibold">📝 ลงชื่อขึ้นเวรล่วงหน้า</span>
+                        <span class="block text-slate-400 text-xs font-normal mt-0.5">สำหรับบันทึกคิวเวรของ "เดือนหน้า"</span>
+                    </div>
+                </div>
+                <span class="text-slate-300 group-hover:text-slate-400 text-sm">▶</span>
+            </button>
+
+            <button id="btn-goto-now" class="w-full bg-white active:bg-slate-100 p-4 rounded-2xl shadow-sm border border-slate-100 text-left font-bold flex justify-between items-center transform active:scale-[0.98] transition-all duration-100 group">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-indigo-100 text-indigo-600 p-3 rounded-xl group-active:bg-indigo-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    </div>
+                    <div>
+                        <span class="block text-slate-800 text-sm font-semibold">🔁 จัดการ / เปลี่ยนผลัดเวร</span>
+                        <span class="block text-slate-4
