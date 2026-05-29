@@ -108,6 +108,9 @@
         
             // 🔵 เคสงานจัดการ/เปลี่ยนผลัดเวร (เดือนปัจจุบัน)
             if (pageName === 'form-now') {
+                // 🔥 [สั่งงานเพิ่ม] ควบระบบคำนวณพ่นเดือน Dynamic ทันทีที่เปิดหน้าฟอร์มนี้เข้ามา
+                setupDynamicMonths();
+                
                 const btnBack = document.getElementById('btn-back');
                 const typeSelect = document.getElementById('swap-type');
                 
