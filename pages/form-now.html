@@ -1,0 +1,63 @@
+<div class="bg-slate-50 min-h-screen p-4 flex flex-col justify-between">
+    
+    <div>
+        <div class="flex items-center space-x-2 mb-6">
+            <button id="btn-back" class="p-2.5 bg-white active:bg-slate-100 rounded-2xl shadow-sm text-slate-600 transform active:scale-95 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <div>
+                <h2 class="text-base font-bold text-slate-800">🔁 จัดการ / เปลี่ยนผลัดเวร</h2>
+                <p class="text-xs text-slate-400">สลับเปลี่ยนเวร หรือลงยืนยันภาระงานประจำเดือนนี้</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-5">
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">1. เลือกเดือนปฏิบัติงาน</label>
+                <select id="swap-month" class="w-full p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-sm font-semibold text-slate-700 focus:outline-none focus:border-indigo-500">
+                    <option value="พฤษภาคม" selected>พฤษภาคม 2569 (เดือนปัจจุบัน)</option>
+                    <option value="มิถุนายน">มิถุนายน 2569 (เดือนถัดไป)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">2. เลือกประเภทเวร</label>
+                <select id="swap-type" class="w-full p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-sm font-medium text-slate-700 focus:outline-none focus:border-indigo-500">
+                    <option value="">-- เลือกประเภทเวร --</option>
+                    <option value="ชบด">เช้า (ชบด)</option>
+                    <option value="บ่ายน้อย">บ่ายน้อย</option>
+                    <option value="SMC">นอกเวลา SMC</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">3. เลือกรายการวันปฏิบัติงานในตาราง</label>
+                <select id="swap-shift-select" disabled class="w-full p-3.5 bg-slate-100 border border-slate-200 rounded-2xl text-sm font-medium text-slate-400 cursor-not-allowed focus:outline-none focus:border-indigo-500">
+                    <option value="">-- กรุณาเลือกประเภทเวรก่อน --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">4. รูปแบบปฏิบัติงาน / ผู้รับแลกเวร</label>
+                <select id="swap-substitute" disabled class="w-full p-3.5 bg-slate-100 border border-slate-200 rounded-2xl text-sm font-medium text-slate-400 cursor-not-allowed focus:outline-none focus:border-indigo-500">
+                    <option value="">-- กรุณาเลือกรายการวันปฏิบัติงานในข้อ 3 ก่อน --</option>
+                </select>
+            </div>
+
+            <div class="pt-2">
+                <button id="btn-submit-now" disabled class="w-full bg-slate-300 text-slate-500 font-bold p-4 rounded-2xl shadow-sm text-center text-sm cursor-not-allowed transform active:scale-[0.99] transition-all duration-100 flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    <span>ส่งข้อมูลบันทึกสลับเปลี่ยนเวร</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="text-center text-slate-400 text-[10px] font-mono py-4">
+        PharmCNT • Current Month Shift Management
+    </div>
+</div>
