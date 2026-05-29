@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบจัดการเวร PharmCNT</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    
     <style>
         /* ตกแต่งฟอนต์พื้นฐานเพื่อให้แสดงผลภาษาไทยได้อย่างละมุนบนหน้าจอมือถือ */
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
@@ -27,39 +27,84 @@
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxj4l0Lou5cV1P9D0eZRv12oAsWW9Fx3OQNv7ZkmSUhjskrXx3H_xCesQyFWSQ7XQsQ/exec";
 
         // ตัวแปรส่วนกลาง (Global State) สำหรับผูกตัวตนเจ้าหน้าที่ผ่านไลน์ด่านแรก
-        // 🔒 ประกาศเป็นกล่องปล่าวสแตนด์บายไว้ (ห้ามลบออก) เพื่อรองรับข้อมูลจริงจาก LINE LIFF
+        let myLineUserId = ""; // 🎯 กล่องใหม่สำหรับเก็บ LINE User ID เฉพาะบุคคล
         let myGroup = "";      // จะถูกเติมค่าโดยอัตโนมัติหลังสแกนกลุ่มงานเสร็จ
         let myFullName = "";   // จะถูกเติมค่าโดยอัตโนมัติหลัง LINE Login สำเร็จ
         let allShiftsCache = []; // หน่วยความจำสำรองสำหรับเก็บตารางเวรทั้งเดือนเพื่อใช้ในหน้าภาพรวม
 
         // 🚀 สั่งเปิดระบบให้โหลดหน้าแรก (home.html) ทันทีที่เปิดแอปพลิเคชัน
         window.addEventListener('DOMContentLoaded', () => {
-            initializeLiff();
+            checkUrlCredentials();
         });
 
-        // 🟢 [ท่อนสคริปต์เรียก LINE Login] 
-    function initializeLiff() {
-        // นำค่า LIFF ID จากหน้าแผง LINE Developers ของอาจารย์มาหยอดใส่ตรงนี้
-        liff.init({ liffId: "YOUR_LIFF_ID_HERE" }) 
-            .then(() => {
-                // เช็คว่าเจ้าหน้าที่คนนี้ได้ทำการ Login ผ่าน LINE แล้วหรือยัง?
-                if (!liff.isLoggedIn()) {
-                    // 🚪 ถ้ายังไม่ได้ล็อกอิน ให้เด้งเปิดประตูหน้าต่าง LINE Login ครอบหน้าจอทันที
-                    liff.login();
-                } else {
-                    // 🎉 ถ้าผ่านด่านสแกนเรียบร้อยแล้ว ให้ไปดึงชื่อจริงมาใช้งาน
-                    getUserLineProfile();
-                }
-            })
-            .catch((err) => {
-                console.error("🔴 LINE LIFF เริ่มต้นระบบล้มเหลว:", err);
-                // แผนสำรอง: หากเปิดบนคอมพิวเตอร์แล้วไม่ได้เชื่อม LINE ให้ยอมเปิดหน้าแรกข้ามไปก่อนได้เพื่อเทสระบบ
-                //myFullName = "นายวิศวัสต์ ปาริยะประเสริฐ";
-                //myGroup = "เภสัชกร";
-                //switchPage('home');
-            });
-    }
+   // 🔍 ฟังก์ชันแกะรอยตรวจสอบตัวตนจาก URL Parameter (ฉบับอัปเกรดระบบตรวจจับการลงทะเบียน)
+function checkUrlCredentials() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const uid = urlParams.get('uid');
+    const name = urlParams.get('name');
 
+    if (uid && name) {
+        myLineUserId = uid;
+        myFullName = decodeURIComponent(name); // ชื่อเล่น/ชื่อตั้งใน LINE จังหวะแรก
+        
+        console.log("🟢 ได้รับข้อมูลจาก LINE OAuth สำเร็จ:", myLineUserId);
+
+        // 🚨 [จุดแก้ไขสำคัญ] เปลี่ยนจากตรวจสอบกลุ่มงานเฉยๆ เป็นการ "ตรวจบัตรคิวลงทะเบียน"
+        checkUserRegistrationStatus(myLineUserId);
+    } else {
+        // 🚪 เคสเข้ามาหน้าเว็บตัวเปล่า: ดีดส่งไปหน้าต่างล็อกอินสีเขียวของ LINE
+        redirectToLineLogin();
+    }
+}
+
+// 🎯 [ฟังก์ชันใหม่] ยิงไปเช็คใน Sheet ว่า LINE User ID นี้เคยลงทะเบียนไว้หรือยัง?
+function checkUserRegistrationStatus(userId) {
+    const container = document.getElementById('app-container');
+    container.innerHTML = '<div class="flex items-center justify-center min-h-screen text-slate-500 text-sm">⏳ กำลังตรวจสอบประวัติการลงทะเบียน...</div>';
+
+    fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({ 
+            action: "checkUserRegistry", 
+            uid: userId 
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "registered") {
+            // 🎉 เคสที่ 1: เป็นผู้ใช้เก่าที่เคยลงทะเบียนแล้ว 
+            // ให้เขียนทับตัวแปรด้วย "ชื่อจริงภาษาไทย" และ "กลุ่มงานจริง" ที่ดึงมาจาก Google Sheet
+            myFullName = data.fullName; 
+            myGroup = data.group;
+            
+            console.log(`Welcome back: ${myFullName} (${myGroup})`);
+            switchPage('home'); // พาวิ่งเข้าหน้าหลัก 3 ปุ่มทันที
+            
+        } else if (data.status === "not_registered") {
+            // 📝 เคสที่ 2: ตรวจไม่เจอเลข ID นี้ในฐานข้อมูล (พนักงานใหม่)
+            console.log("⚠️ พนักงานใหม่ยังไม่ได้ลงทะเบียน ดีดไปหน้าฟอร์มลงทะเบียน");
+            
+            // อาจารย์สร้างไฟล์ชื่อ register.html ไว้ในโฟลเดอร์ pages/ เพื่อรอรับแรงกระแทกได้เลยครับ
+            switchPage('register'); 
+        }
+    })
+    .catch(err => {
+        console.error("🔴 ตรวจสอบสถานะลงทะเบียนล้มเหลว:", err);
+        container.innerHTML = `<div class="p-4 text-center text-rose-500">❌ ระบบตรวจสอบรายชื่อขัดข้อง: ${err.message}</div>`;
+    });
+}
+    // ✈️ ฟังก์ชันพาวิ่งไปหน้าล็อกอินระบบปิดของ LINE (มาแทนที่ระบบ liff.login)
+    function redirectToLineLogin() {
+        const state = Math.random().toString(36).substring(7); 
+        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize` +
+                            `?response_type=code` +
+                            `&client_id=${LINE_CLIENT_ID}` +
+                            `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+                            `&state=${state}` +
+                            `&scope=profile%20openid`; // openid คือตัวบังคับเพื่อขอเลข User ID
+                            
+        window.location.href = lineAuthUrl;
+    }
     // 👤 ฟังก์ชันแกะกล่องประวัติพนักงานจากเซิร์ฟเวอร์ LINE
     function getUserLineProfile() {
         liff.getProfile()
