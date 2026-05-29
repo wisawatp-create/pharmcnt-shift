@@ -1,326 +1,179 @@
+const CLIENT_ID = "2010181979"; // ไอดี LINE Login
+const REDIRECT_URI = "https://wisawatp-create.github.io/pharmcnt-shift/index.html"; // หน้าเว็บของอาจารย์
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxj4l0Lou5cV1P9D0eZRv12oAsWW9Fx3OQNv7ZkmSUhjskrXx3H_xCesQyFWSQ7XQsQ/exec";
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PharmCNT Web App (LINE OAuth)</title>
+    <title>ระบบจัดการเวร PharmCNT</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ตกแต่งฟอนต์พื้นฐานเพื่อให้แสดงผลภาษาไทยได้อย่างละมุนบนหน้าจอมือถือ */
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased font-sans">
+<body class="bg-slate-100 min-h-screen">
 
-    <div id="page-loading" class="max-w-md mx-auto min-h-screen flex flex-col justify-center items-center p-4">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-        <p class="text-slate-500 text-sm font-medium">กำลังตรวจสอบสิทธิ์ผ่านระบบ LINE Login...</p>
-    </div>
-
-
-    <div id="page-register" class="max-w-md mx-auto min-h-screen flex flex-col justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
-            <div class="text-center mb-6">
-                <span class="text-5xl">🔑</span>
-                <h2 class="text-xl font-bold text-slate-800 mt-2">ลงทะเบียนผูกสิทธิ์</h2>
-                <p class="text-xs text-slate-500 mt-1">โปรดผูกบัญชี LINE เข้ากับระบบกลุ่มงานเภสัชกรรม</p>
-            </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">1. ประเภทเจ้าหน้าที่</label>
-                    <select id="reg-group" onchange="fetchNamesFromSheet()" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500">
-                        <option value="">-- โปรดระบุประเภท --</option>
-                        <option value="เภสัชกร">เภสัชกร</option>
-                        <option value="เจ้าพนักงานเภสัชกรรม">เจ้าพนักงานเภสัชกรรม</option>
-                        <option value="ลูกจ้าง">ลูกจ้าง</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">2. ชื่อ - สกุล จริงของคุณ</label>
-                    <select id="reg-fullname" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500" disabled>
-                        <option value="">-- กรุณาเลือกประเภทเจ้าหน้าที่ก่อน --</option>
-                    </select>
-                </div>
-                <button onclick="submitRegister()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition mt-2 text-sm">
-                    ✅ ยืนยันการลงทะเบียนเข้าใช้งาน
-                </button>
-            </div>
+    <div id="app-container" class="max-w-md mx-auto min-h-screen bg-slate-50 relative shadow-2xl shadow-slate-300/50">
+        <div class="flex items-center justify-center min-h-screen p-4 text-slate-500 text-sm">
+            ⏳ กำลังเตรียมความพร้อมระบบ PharmCNT...
         </div>
     </div>
-
-
-    <div id="page-main-menu" class="max-w-md mx-auto p-4 hidden">
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xl shadow-inner">
-                💊
-            </div>
-            <div>
-                <h3 id="user-fullname" class="text-base font-bold text-slate-800">กำลังโหลดชื่อ...</h3>
-                <p id="user-role" class="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-0.5">ประเภทบุคลากร</p>
-            </div>
-        </div>
-
-        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">เมนูระบบงาน</h3>
-        
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <button onclick="switchPage('page-menu1')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:bg-slate-50 transition">
-                <span class="text-3xl mb-2">🔄</span>
-                <span class="text-sm font-bold text-slate-700">บันทึกแลกเวร</span>
-                <span class="text-xxs text-slate-400 mt-1">แจ้งเปลี่ยนผลัดเวร</span>
-            </button>
-            <button onclick="switchPage('page-menu2')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:bg-slate-50 transition">
-                <span class="text-3xl mb-2">📅</span>
-                <span class="text-sm font-bold text-slate-700">ตารางเวรของฉัน</span>
-                <span class="text-xxs text-slate-400 mt-1">เช็คภาระงานส่วนตัว</span>
-            </button>
-            <button onclick="switchPage('page-menu3')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:bg-slate-50 transition">
-                <span class="text-3xl mb-2">🏥</span>
-                <span class="text-sm font-bold text-slate-700">ภาพรวมตึก</span>
-                <span class="text-xxs text-slate-400 mt-1">ตารางปฏิบัติงานทั้งตึก</span>
-            </button>
-            <button id="btn-admin-panel" onclick="switchPage('page-menu4')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center hover:bg-slate-50 transition hidden">
-                <span class="text-3xl mb-2">🛠️</span>
-                <span class="text-sm font-bold text-slate-700">แผงผู้บริหาร</span>
-                <span class="text-xxs text-slate-400 mt-1">อนุมัติและ Audit สิ้นเดือน</span>
-            </button>
-        </div>
-    </div>
-
-
-    <div id="page-menu1" class="max-w-md mx-auto p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 space-y-4">
-            <h3 class="text-lg font-bold text-slate-800 border-b pb-2 flex items-center">🔄 ฟอร์มแจ้งขอสลับ/แลกเวร</h3>
-            
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">1. เลือกเดือนปฏิบัติงาน</label>
-                <select id="swap-month" onchange="resetAndLoadShifts()" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium text-blue-600 focus:ring-2 focus:ring-blue-500">
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">2. เลือกประเภทเวร</label>
-                <select id="swap-type" onchange="loadUserAvailableShifts()" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- โปรดเลือกประเภทเวร --</option>
-                    <option value="ชบด">เวร ชบด. (เช้า บ่าย ดึก)</option>
-                    <option value="บ่ายน้อย">เวรบ่ายน้อย</option>
-                    <option value="SMC">เวร SMC (นอกเวลาพิเศษ)</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">3. เลือก วัน/เวลา เวรเดิมของคุณ</label>
-                <select id="swap-shift-select" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500" disabled>
-                    <option value="">-- กรุณาเลือกประเภทเวรก่อน --</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">4. ผู้ปฏิบัติงานแทน (ผู้รับแลก)</label>
-                <select id="swap-substitute" class="w-full p-3 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- เลือกชื่อผู้ปฏิบัติงานแทน --</option>
-                </select>
-            </div>
-
-            <div class="pt-2 space-y-2">
-                <button onclick="submitShiftExchange()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">
-                    🚀 ส่งบันทึกรายการแลกเวร
-                </button>
-                <button onclick="switchPage('page-main-menu')" class="w-full bg-slate-100 text-slate-600 font-medium py-2.5 rounded-xl text-xs">
-                    ยกเลิกและกลับหน้าหลัก
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="page-menu2" class="max-w-md mx-auto p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 text-center">
-            <h3 class="text-lg font-bold text-slate-800 mb-2">📅 ตารางเวรส่วนตัวของฉัน</h3>
-            <p class="text-sm text-slate-400 mb-4">ระบบดึงรายงานคิวเวรรายบุคคลจาก Google Sheet</p>
-            <button onclick="switchPage('page-main-menu')" class="w-full bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-sm">กลับหน้าหลัก</button>
-        </div>
-    </div>
-
-    <div id="page-menu3" class="max-w-md mx-auto p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 text-center">
-            <h3 class="text-lg font-bold text-slate-800 mb-2">🏥 ตารางรวมกลุ่มงานประจำเดือน</h3>
-            <p class="text-sm text-slate-400 mb-4">แสดงบอร์ดรายชื่อเวรภาพรวมของเจ้าหน้าที่ทั้งหมด</p>
-            <button onclick="switchPage('page-main-menu')" class="w-full bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-sm">กลับหน้าหลัก</button>
-        </div>
-    </div>
-
-    <div id="page-menu4" class="max-w-md mx-auto p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 text-center">
-            <h3 class="text-lg font-bold text-slate-800 mb-2">🛠️ แผงจัดการผู้บริหาร</h3>
-            <p class="text-sm text-slate-400 mb-4">ส่วนอนุมัติการสับเปลี่ยนเวร และรันสรุปยอด Audit ภาระงานสิ้นเดือน</p>
-            <button onclick="switchPage('page-main-menu')" class="w-full bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-sm">กลับหน้าหลัก</button>
-        </div>
-    </div>
-
 
     <script>
-        // ⚙️ ตั้งค่าความเชื่อมโยงระบบ (อาจารย์กรอกค่าจริงให้ตรงกันเป๊ะๆ)
-         // ⚙️ ตั้งค่าข้อมูลจาก LINE Developers ของอาจารย์
+        // 🔒 [จุดตั้งค่า] อาจารย์นำ URL ของ Google Apps Script Web App มาใส่ตรงนี้ครับ
         const CLIENT_ID = "2010181979"; // ไอดี LINE Login
         const REDIRECT_URI = "https://wisawatp-create.github.io/pharmcnt-shift/index.html"; // หน้าเว็บของอาจารย์
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxj4l0Lou5cV1P9D0eZRv12oAsWW9Fx3OQNv7ZkmSUhjskrXx3H_xCesQyFWSQ7XQsQ/exec";
 
-        let userLineId = "";
-        let myFullName = "";
-        let myGroup = "";
+        // ตัวแปรส่วนกลาง (Global State) สำหรับผูกตัวตนเจ้าหน้าที่ผ่านไลน์ด่านแรก
+        // 🔒 ประกาศเป็นกล่องปล่าวสแตนด์บายไว้ (ห้ามลบออก) เพื่อรองรับข้อมูลจริงจาก LINE LIFF
+        let myGroup = "";      // จะถูกเติมค่าโดยอัตโนมัติหลังสแกนกลุ่มงานเสร็จ
+        let myFullName = "";   // จะถูกเติมค่าโดยอัตโนมัติหลัง LINE Login สำเร็จ
+        let allShiftsCache = []; // หน่วยความจำสำรองสำหรับเก็บตารางเวรทั้งเดือนเพื่อใช้ในหน้าภาพรวม
 
-        // ฟังก์ชันสั่งสลับเปิดตา/ปิดตาของแต่ละหน้าจอ (SPA หลีกเลี่ยง Security LINE บล็อก)
-        function switchPage(pageId) {
-            const pages = ['page-loading', 'page-register', 'page-main-menu', 'page-menu1', 'page-menu2', 'page-menu3', 'page-menu4'];
-            pages.forEach(id => document.getElementById(id).classList.add('hidden'));
-            document.getElementById(pageId).classList.remove('hidden');
-        }
+        // 🚀 สั่งเปิดระบบให้โหลดหน้าแรก (home.html) ทันทีที่เปิดแอปพลิเคชัน
+        window.addEventListener('DOMContentLoaded', () => {
+            switchPage('home');
+        });
 
-        // ฟังก์ชันเริ่มรันระบบทันทีเมื่อโหลดหน้าเว็บ
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code'); // ค้นหาตัวแปรโค้ดที่ LINE ส่งแนบกลับมา
-
-            if (!code) {
-                // 🔴 เคสที่ 1: เปิดเว็บบราวเซอร์ขึ้นมาครั้งแรกแบบไม่มีเซสชัน ให้กระโดดไป LINE Login ทันที
-                const state = "pharmcnt_secure_rand_999";
-                const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}&scope=profile%20openid`;
-                window.location.href = lineLoginUrl;
-            } else {
-                // 🟢 เคสที่ 2: ดึง Code ลับจากหน้า LINE กลับมาสำเร็จ ส่งไปแกะหา LINE ID ที่หลังบ้าน GAS
-                initMonthSelector();
-                exchangeCodeForProfile(code);
-            }
-        };
-
-        // ยิง Fetch API คุยข้ามโดเมนข้ามไปหา GAS เพื่อแลกเปลี่ยนและหาตัวตนจาก LINE
-        function exchangeCodeForProfile(code) {
-            fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "getLineIdFromCode",
-                    code: code,
-                    redirectUri: REDIRECT_URI
+        // 🔄 ฟังก์ชันอัจฉริยะสำหรับดูดไฟล์ HTML ข้ามฝั่งมาเปิดสลับแสดงผลบนหน้าจอ
+        function switchPage(pageName) {
+            const container = document.getElementById('app-container');
+            
+            // วิ่งไป Fetch ข้อความดิบจากไฟล์ย่อยในโฟลเดอร์ pages/ บน GitHub
+            fetch(`pages/${pageName}.html`)
+                .then(res => {
+                    if (!res.ok) throw new Error("ไม่สามารถโหลดโครงสร้างหน้าจอแยกไฟล์ได้");
+                    return res.text();
                 })
-            })
-            .then(res => res.json())
-            .then(res => {
-                if (res.status === "success") {
-                    userLineId = res.lineUid; // บันทึกรหัสล็อกอินเก็บไว้ในระบบหน้านี้
+                .then(htmlContent => {
+                    // สาดเนื้อหา HTML ย่อยเข้าสู่กล่องกลางหน้าแอป
+                    container.innerHTML = htmlContent;
                     
-                    if (res.isRegistered) {
-                        // ประสบความสำเร็จเคยลงทะเบียนมาแล้ว -> ดึงชื่อจริงไปโชว์พาสเข้าเมนูหลัก
-                        myFullName = res.fullName;
-                        myGroup = res.group;
-                        document.getElementById('user-fullname').innerText = res.fullName;
-                        document.getElementById('user-role').innerText = "ประเภทบุคลากร: " + res.group;
-
-                        if (res.isAdmin) {
-                            document.getElementById('btn-admin-panel').classList.remove('hidden'); // ปลดล็อกปุ่มแอดมินให้อาจารย์วิศรุต
-                        }
-                        switchPage('page-main-menu');
-                    } else {
-                        // สมาชิกใหม่เปิดประเดิมระบบครั้งแรก -> สั่งเด้งเปิดหน้าลงทะเบียนเลือกชื่อผูกสิทธิ์
-                        switchPage('page-register');
-                    }
-                } else {
-                    alert("ความผิดพลาดทางระบบสิทธิ์ LINE: " + res.message);
-                }
-            })
-            .catch(err => {
-                alert("เชื่อมต่อหลังบ้าน GAS ล้มเหลว โปรดตรวจสอบสถานะการ Deployment เป็นแบบ Anyone");
-            });
-        }
-
-        // ดึงรายชื่อพนักงานจากแท็บ name_position บนชีทส่งกลับทำตัวเลือก Dropdown
-        function fetchNamesFromSheet() {
-            const group = document.getElementById('reg-group').value;
-            const nameSelect = document.getElementById('reg-fullname');
-            if (!group) return;
-
-            nameSelect.innerHTML = "<option>กำลังติดต่อ Google Sheet ดึงรายชื่อพนักงาน...</option>";
-            nameSelect.disabled = true;
-
-            fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "getStaffNamesList", group: group })
-            })
-            .then(res => res.json())
-            .then(data => {
-                nameSelect.innerHTML = '<option value="">-- เลือกชื่อจริงของคุณ --</option>';
-                data.names.forEach(name => {
-                    let opt = document.createElement('option');
-                    opt.value = name;
-                    opt.innerText = name;
-                    nameSelect.appendChild(opt);
+                    // 🔥 ปลุกพลังลอจิกควบคุมปุ่มให้เหมาะสมกับประเภทหน้าจอนั้นๆ ทันที
+                    initPageLogic(pageName);
+                })
+                .catch(err => {
+                    container.innerHTML = `
+                        <div class="p-6 text-center text-sm font-semibold text-rose-500">
+                            ❌ เกิดข้อผิดพลาดในการโหลดหน้าจอ: ${err.message}
+                        </div>`;
                 });
-                nameSelect.disabled = false;
-            });
         }
 
-        // ยืนยันการลงทะเบียนผูกสิทธิ์ LINE_UID เข้าตาราง User_Registry 
-        function submitRegister() {
-            const group = document.getElementById('reg-group').value;
-            const name = document.getElementById('reg-fullname').value;
-            if (!group || !name) { alert("กรุณาเลือกข้อมูลกลุ่มงานและชื่อจริงให้ครบถ้วนครับ"); return; }
+        // =======================================================
+        // 🧠 ฟังก์ชันศูนย์รวมลอจิก: ผูกพฤติกรรมปุ่มหลังจากแยกหน้าจอแล้ว
+        // =======================================================
+        function initPageLogic(pageName) {
+            
+            // 🏠 เคสหน้าจอหลัก (Home / Dashboard)
+            if (pageName === 'home') {
+                document.getElementById('btn-goto-next').onclick = () => switchPage('form-next');
+                document.getElementById('btn-goto-now').onclick = () => switchPage('form-now');
+                document.getElementById('btn-goto-overview').onclick = () => switchPage('overview');
+            }
+            
+            // 🟢 เคสงานบันทึกเวรล่วงหน้า (เดือนหน้า)
+            if (pageName === 'form-next') {
+                document.getElementById('btn-back').onclick = () => switchPage('home');
+                
+                const typeSelect = document.getElementById('swap-type');
+                const submitBtn = document.getElementById('btn-submit-next');
+                
+                // เมื่อเลือกประเภทเวร ให้ไปดึงคิวเวรในชีทล่วงหน้ามาแสตนด์บาย
+                typeSelect.onchange = function() {
+                    loadUserAvailableShifts('form-next');
+                };
+                
+                // ดักจับจังหวะการเปิดล็อกปุ่มบันทึก
+                document.getElementById('swap-shift-select').onchange = function() {
+                    if (this.value !== "") {
+                        submitBtn.disabled = false;
+                        submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-4 rounded-2xl shadow-lg transform active:scale-[0.99] transition-all flex items-center justify-center space-x-2";
+                    } else {
+                        submitBtn.disabled = true;
+                        submitBtn.className = "w-full bg-slate-300 text-slate-500 font-bold p-4 rounded-2xl cursor-not-allowed flex items-center justify-center space-x-2";
+                    }
+                };
+            }
 
-            fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "registerUser", uid: userLineId, name: name, group: group })
-            })
-            .then(res => res.json())
-            .then(res => {
-                if (res.status === "success") {
-                    alert("ลงทะเบียนผูกสิทธิ์เรียบร้อยระบบทำการรีเฟรชฐานข้อมูลหลักเพื่อเข้าใช้งานครับ");
-                    // รีเซ็ตเพื่อดึงข้อมูลเช็คเข้าหน้าหลักอัติโนมัติ
-                    window.location.href = REDIRECT_URI;
-                }
-            });
+            // 🔵 เคสงานจัดการ/เปลี่ยนผลัดเวร (เดือนปัจจุบัน)
+            if (pageName === 'form-now') {
+                document.getElementById('btn-back').onclick = () => switchPage('home');
+                
+                const typeSelect = document.getElementById('swap-type');
+                const subSelect = document.getElementById('swap-substitute');
+                const submitBtn = document.getElementById('btn-submit-now');
+                
+                // เมื่อเปลี่ยนประเภทเวร ให้ยิงกวาดคิวเวรเดือนปัจจุบันมาเรนเดอร์ในข้อ 3
+                typeSelect.onchange = function() {
+                    loadUserAvailableShifts('form-now');
+                };
+                
+                // ดักจับช่องข้อ 4 (ผู้รับแลก) ถ้ากรอกครบถ้วนจึงจะยอมให้เปิดล็อกปุ่มส่งข้อมูล
+                subSelect.onchange = function() {
+                    if (this.value !== "") {
+                        submitBtn.disabled = false;
+                        submitBtn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-4 rounded-2xl shadow-lg transform active:scale-[0.99] transition-all flex items-center justify-center space-x-2";
+                    } else {
+                        submitBtn.disabled = true;
+                        submitBtn.className = "w-full bg-slate-300 text-slate-500 font-bold p-4 rounded-2xl cursor-not-allowed flex items-center justify-center space-x-2";
+                    }
+                };
+            }
+
+            // 🟠 เคสหน้าจอภาพรวมตารางรวมเดือน (มินิปฏิทินจุดสี)
+            if (pageName === 'overview') {
+                document.getElementById('btn-back-home').onclick = () => switchPage('home');
+                
+                // โหลดประมวลผลข้อมูลเวรดิบภาพรวมรอบแรก
+                fetchOverviewDataAndRender();
+                
+                // ผูกสิทธิ์และพฤติกรรมสลับแท็บเม็ดยา 3 ประเภทเวร
+                const tabs = document.querySelectorAll('.tab-filter');
+                tabs.forEach(tab => {
+                    tab.onclick = function() {
+                        tabs.forEach(t => {
+                            t.className = "tab-filter text-slate-600 font-medium py-2.5 px-1 rounded-xl text-xs text-center transition-all duration-150";
+                        });
+                        this.className = "tab-filter bg-white text-indigo-700 font-bold py-2.5 px-1 rounded-xl text-xs text-center shadow-sm transition-all duration-150";
+                        
+                        // สั่งวาดปฏิทินจุดสีเด้งตอบสนองใหม่ทันทีตามแท็บที่กด
+                        renderCalendarGrid(this.innerText.trim());
+                    };
+                });
+            }
         }
 
-        // =================================================================
-        // 🔄 ปรับปรุงลอจิกการคำนวณและเลือกเดือนล่วงหน้า 2 เดือนอัตโนมัติ
-        // =================================================================
-        function initMonthSelector() {
-            const mSelect = document.getElementById('swap-month');
-            const thMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            
-            // 1. คำนวณเดือนปัจจุบัน
-            const d = new Date();
-            const curMonthName = thMonths[d.getMonth()];
-            
-            // 2. คำนวณเดือนถัดไป (รองรับการข้ามปีอัตโนมัติ เช่น ธันวาคม -> มกราคม)
-            const nextMDate = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-            const nextMonthName = thMonths[nextMDate.getMonth()];
+        // -------------------------------------------------------------
+        // 🛠️ คลังฟังก์ชันเชื่อมต่อสคริปต์หลังบ้าน (Core Integration Functions)
+        // -------------------------------------------------------------
         
-            // 3. ยัดรายชื่อเดือนลงใน Dropdown HTML
-            // ระบบจะส่งชื่อเดือนตัวเปล่า (เช่น "พฤษภาคม") ข้ามไปเป็น Keyword คัดกรองใน GAS ทันที
-            mSelect.innerHTML = `
-                <option value="${curMonthName}">เดือนปัจจุบัน (${curMonthName})</option>
-                <option value="${nextMonthName}">เดือนถัดไป (${nextMonthName})</option>
-            `;
-        }
-
-        function resetAndLoadShifts() {
-            document.getElementById('swap-type').value = "";
-            document.getElementById('swap-shift-select').innerHTML = '<option value="">-- กรุณาเลือกประเภทเวรก่อน --</option>';
-            document.getElementById('swap-shift-select').disabled = true;
-        }
-
-        // โหลดเฉพาะวันเวลาคิวเวรที่เป็นตารางส่วนตัว เพื่อล็อกสิทธิ์ห้ามส่งวันเวลาสลับเวรผิดพลาด
-       // โหลดรายการเวรทั้งหมดในเดือน และควบคุมเงื่อนไขผู้ปฏิบัติงานแทนแบบ Dynamic
-        function loadUserAvailableShifts() {
+        // 1. ฟังก์ชันกวาดข้อมูลคิวเวรจากตารางชีท (ใช้ร่วมกันทั้งเดือนปัจจุบันและเดือนหน้า)
+        function loadUserAvailableShifts(mode) {
             const monthSelect = document.getElementById('swap-month');
             const month = monthSelect.value;
-            // ดึง Text ที่แสดง (เพื่อเช็คว่าเป็น "เดือนปัจจุบัน" หรือ "เดือนถัดไป")
-            const monthText = monthSelect.options[monthSelect.selectedIndex].text; 
+            const monthText = (mode === 'form-next') ? "เดือนถัดไป" : monthSelect.options[monthSelect.selectedIndex].text;
             
             const type = document.getElementById('swap-type').value;
             const sSelect = document.getElementById('swap-shift-select');
             const subSelect = document.getElementById('swap-substitute');
-        
-            if (!type) return;
-            sSelect.innerHTML = "<option>กำลังกวาดฐานคิวเวรในระบบ...</option>";
+
+            if (!type) {
+                sSelect.innerHTML = '<option value="">-- กรุณาเลือกประเภทเวรก่อน --</option>';
+                sSelect.disabled = true;
+                return;
+            }
+
+            sSelect.innerHTML = "<option>⏳ กำลังกวาดฐานคิวเวรในระบบ...</option>";
             sSelect.disabled = true;
 
-            console.log( type , month , myGroup )
-            // 1. ยิงดึงข้อมูลเวรทั้งหมดของเดือนจากตารางชีท
+            // ยิง Fetch จัดส่งพัสดุ Payload ไปหา GAS หลังบ้าน
             fetch(GAS_URL, {
                 method: "POST",
                 body: JSON.stringify({ 
@@ -332,78 +185,60 @@
             })
             .then(res => res.json())
             .then(data => {
-                console.log(data.shifts)
-                // ให้ดึงตัวแปร data มาใช้งานโดยตรง ไม่ต้องผ่าน .shifts
-                 const shiftsList = data.shifts;
-                // ล้างค่า Dropdown เป็นค่าเริ่มต้น
+                const shiftsList = (data && data.shifts) ? data.shifts : data;
                 sSelect.innerHTML = '<option value="">-- เลือกรายการวันปฏิบัติงานในตาราง --</option>';
-
-                //  เช็คว่าข้อมูลที่ส่งมาเป็น Array ไหม และมีข้อมูลข้างในหรือไม่
+                
                 if (!Array.isArray(shiftsList) || shiftsList.length === 0) {
                     sSelect.innerHTML = '<option value="">❌ เดือนนี้ไม่มีข้อมูลเวรประเภทนี้ในระบบ</option>';
-                    sSelect.disabled = true; // ล็อกปุ่มไว้หากไม่มีข้อมูล
                     return;
                 }
 
-                // ลูปป้อนข้อมูลลง Dropdown (ใช้ชื่อคีย์ item.row และ item.display พิมพ์เล็กตรงเป๊ะ)
                 shiftsList.forEach(item => {
                     let opt = document.createElement('option');
-                    opt.value = item.row;         // พิมพ์เล็กตรงตามโครงสร้าง GAS
-                    opt.innerText = item.display; // พิมพ์เล็กตรงตามโครงสร้าง GAS
+                    opt.value = item.row;         
+                    opt.innerText = item.display; 
                     sSelect.appendChild(opt);
                 });
+                sSelect.disabled = false;
 
-                // ปลดล็อก Dropdown ให้เจ้าหน้าที่กดเลือกได้สำเร็จ
-                sSelect.disabled = false;    
-
-                // 🔥 ผูกเหตุการณ์เพิ่ม: เมื่อเจ้าหน้าที่คลิกเลือกแถวเวรในข้อ 3 แล้ว ให้วิ่งไปปลดล็อกข้อ 4 อัตโนมัติ
+                // ผูกเหตุการณ์: เมื่อกดคลิกเลือกเวรเดิมในช่อง 3 ค่อยส่งไม้ต่อให้ช่อง 4 ทำงานต่ออย่างเป็นระบบ
                 sSelect.onchange = function() {
                     unlockAndLoadSubstitute(monthText, this.options[this.selectedIndex].text);
                 };
             })
             .catch(err => {
-                // ดักจับกรณีแกะโค้ดพลาด จะได้รู้ว่าพังเพราะอะไร
-                console.error("🔴 เกิดข้อผิดพลาดฝั่ง HTML:", err);
                 sSelect.innerHTML = `<option value="">❌ ระบบขัดข้อง: ${err.message}</option>`;
             });
-        
-            
         }
 
-        // =================================================================
-        // 🔑 2. ฟังก์ชันใหม่: ปลดล็อกช่องผู้รับแลก + คัดกรองชื่อซ้ำซ้อนขั้นสูง
-        // =================================================================
+        // 2. ฟังก์ชันปลดล็อกช่องที่ 4 + ดักจับสกัดรายชื่อซ้ำด้วยการบดขยี้เว้นวรรค
         function unlockAndLoadSubstitute(monthText, selectedShiftText) {
-            console.log(monthText, selectedShiftText);
             const subSelect = document.getElementById('swap-substitute');
+            if (!subSelect) return; // หากเป็นฟอร์มเดือนหน้าที่ซ่อนค่าไว้ ให้ผ่านลอจิกนี้ไปได้เลย
             
             if (!selectedShiftText || selectedShiftText.includes("-- เลือกรายการวันปฏิบัติงาน")) {
                 subSelect.innerHTML = '<option value="">-- กรุณาเลือกรายการวันปฏิบัติงานในข้อ 3 ก่อน --</option>';
                 subSelect.disabled = true;
                 return;
             }
-        
-            // 🔵 เงื่อนไขที่ 1: ถ้าเป็น "เดือนถัดไป" บังคับล็อกขึ้นปฏิบัติงานเองทันที
+
+            // มาตรการล็อกช่อง 4 อัตโนมัติหากหน้าเว็บสลัดไปเจอเคส "เดือนถัดไป"
             if (monthText.indexOf("เดือนถัดไป") !== -1) {
                 subSelect.innerHTML = '<option value="**ขึ้นปฏิบัติงานเอง**">**ขึ้นปฏิบัติงานเอง**</option>';
                 subSelect.disabled = true;
                 return;
             }
-        
-            // 🟢 เงื่อนไขที่ 2: ถ้าเป็น "เดือนปัจจุบัน" ทำการแกะชื่อเจ้าของเวรเดิมเพื่อตัดสิทธิ์ชื่อซ้ำ
-            subSelect.innerHTML = "<option>กำลังดึงรายชื่อเฉพาะในกลุ่มงาน...</option>";
-            subSelect.disabled = true;
-        
-            // 🔍 แกะรอยหาชื่อเจ้าของเวรเดิมจากข้อความ Display (เช่น "1 พ.ค. [ชบด] - นายอภินันท์" -> แกะได้ "นายอภินันท์")
-            let originalStaffName = "";
-            if (selectedShiftText.includes(" - ")) {
-                originalStaffName = selectedShiftText.split(" - ")[1].trim();
 
-                // 🔥 [จุดแก้ไขวิกฤตที่ 1] ลบเว้นวรรคทุกจุดในชื่อเดิมออกให้หมด (รวมถึงเว้นวรรคตรงกลางชื่อ-สกุล)
-                // เช่น "นายอภินันท์    เทศธรรม" จะกลายเป็น "นายอภินันท์เทศธรรม"
+            subSelect.disabled = true;
+            subSelect.innerHTML = "<option>⏳ กำลังดึงรายชื่อเฉพาะในกลุ่มงาน...</option>";
+
+            let compareOriginalName = ""; 
+            if (selectedShiftText.includes(" - ")) {
+                let originalStaffName = selectedShiftText.split(" - ")[1].trim();
+                // 🔒 บดขยี้เว้นวรรคทุกจุดของชื่อเจ้าของเวรเดิม ป้องกันบั๊กเคาะวรรคสั้นยาวไม่เท่ากันใน Sheet
                 compareOriginalName = originalStaffName.replace(/\s+/g, '');
             }
-        
+
             fetch(GAS_URL, {
                 method: "POST",
                 body: JSON.stringify({ action: "getStaffNamesList", group: myGroup })
@@ -412,14 +247,19 @@
             .then(data => {
                 subSelect.innerHTML = '<option value="">-- เลือกชื่อผู้ปฏิบัติงานแทน --</option>';
                 
+                // 1. เพิ่มตัวเลือกขึ้่นเองไว้บนสุดเสมอเพื่อความสะดวกตามหน้างานของอาจารย์
+                let defaultOpt = document.createElement('option');
+                defaultOpt.value = "**ขึ้นปฏิบัติงานเอง**";
+                defaultOpt.innerText = "**ขึ้นปฏิบัติงานเอง**";
+                subSelect.appendChild(defaultOpt);
+
+                // 2. ลูปรายชื่อคนในแผนกที่ดึงมาจากคลังชีท name_position
                 data.names.forEach(name => {
+                    if (!name) return;
                     const cleanName = name.trim();
-                    const compareCleanName = cleanName.replace(/\s+/g, '');
+                    const compareCleanName = cleanName.replace(/\s+/g, ''); 
                     
-                    // 🔒 ดักจับมาตรการความปลอดภัย 2 ชั้น:
-                    // ชั้นที่ 1: ต้องไม่ใช่ชื่อของตัวผู้ล็อกอินเอง (myFullName)
-                    // ชั้นที่ 2: ต้องไม่ใช่ชื่อของเจ้าของเวรเดิมที่ระบุอยู่บนแถวนั้น (originalStaffName)
-                    console.log(compareCleanName ,compareOriginalName)
+                    // สั่งคัดกรอง: รายชื่อที่จะแสดงต้องไม่ชนกับชื่อเดิมที่ครองเวรนั้นอยู่เด็ดขาด
                     if (compareCleanName !== compareOriginalName) { 
                         let opt = document.createElement('option');
                         opt.value = cleanName;
@@ -427,37 +267,99 @@
                         subSelect.appendChild(opt);
                     }
                 });
-                
-                subSelect.disabled = false; // 🔓 ปลดล็อกให้กดเลือกชื่อเพื่อนได้สำเร็จอย่างปลอดภัย
+                subSelect.disabled = false; 
             })
             .catch(err => {
-                subSelect.innerHTML = `<option value="">❌ โหลดรายชื่อล้มเหลว</option>`;
+                subSelect.innerHTML = `<option value="">❌ โหลดรายชื่อล้มเหลว: ${err.message}</option>`;
             });
         }
 
-        // ยืนยันยิงคำสั่งธุรกรรมบันทึกการแลกเวรกลับลงพิกัดพิกัดแถวตารางชีทของ Google
-        function submitShiftExchange() {
-            const type = document.getElementById('swap-type').value;
-            const rowNum = document.getElementById('swap-shift-select').value;
-            const subStaff = document.getElementById('swap-substitute').value;
-
-            if (!type || !rowNum || !subStaff) { alert("กรุณาเลือกองค์ประกอบฟอร์มแลกเวรให้ครบถ้วนด้วยครับ"); return; }
-
+        // 3. ฟังก์ชันภาพรวม: โฮสต์ขอดึงคลังเวรดิบทั้งเดือนมากักเก็บไว้ในหน่วยความจำ (Cache)
+        function fetchOverviewDataAndRender() {
+            const mSelect = document.getElementById('overview-month');
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '<div class="col-span-7 py-6 text-slate-400 text-xs animate-pulse">⏳ กำลังเชื่อมต่อคลังตารางรวมเดือน...</div>';
+            
+            // ยิง Fetch ดึงข้อมูลประมวลผลตารางรวมเดือนรอบเดียวจบ
             fetch(GAS_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "processShiftExchange", sheetName: type, rowNum: rowNum, substituteStaff: subStaff })
+                body: JSON.stringify({ action: "getAllMonthlyShifts", targetMonth: mSelect.value, group: myGroup })
             })
             .then(res => res.json())
-            .then(res => {
-                if (res.status === "success") {
-                    alert("บันทึกการขอสลับแลกเวรสำเร็จ! รายการถูกส่งขึ้นระบบชีทเล่มกลางแล้วครับ");
-                    switchPage('page-main-menu'); // ย้ายพากลับสู่หน้าต่างเมนูหลัก
-                } else {
-                    alert("ระบบฐานข้อมูลคลาดเคลื่อนแจ้งเตือน: " + res.message);
+            .then(data => {
+                allShiftsCache = data.shifts || []; // บันทึกข้อมูลใส่ตู้ Cache หน้าบ้าน
+                renderCalendarGrid("เช้าบ่ายดึก"); // วาดปฏิทินปักหมุดจุดสีโดยเริ่มต้นที่เวรหลักก่อน
+            })
+            .catch(err => {
+                grid.innerHTML = `<div class="col-span-7 py-4 text-xs text-rose-500">❌ โหลดคลังตารางพลาด: ${err.message}</div>`;
+            });
+
+            mSelect.onchange = fetchOverviewDataAndRender; // สั่งโหลดซ้ำหากมีการขยับเปลี่ยนเดือนส่องดู
+        }
+
+        // 4. ฟังก์ชันภาพรวม: เครื่องยนต์คำนวณวันและวาดจุดสีลงช่องมินิปฏิทินประจำเดือน
+        function renderCalendarGrid(selectedType) {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = ""; // เคลียร์ปฏิทินเก่า
+            
+            // วาดบล็อกช่องวันที่จำลอง 1-31 (อาจารย์สามารถขยายโลจิกคำนวณวันว่าง/วันเริ่มต้นของเดือนเพิ่มตรงนี้ได้ครับ)
+            for (let day = 1; day <= 31; day++) {
+                let cell = document.createElement('div');
+                cell.className = "py-2 bg-slate-50 hover:bg-slate-200/50 rounded-xl cursor-pointer transition-all flex flex-col justify-between h-11 border border-slate-100/40 relative";
+                cell.innerHTML = `<span>${day}</span>`;
+                
+                // 🔍 สแกนควานหาในตู้ Cache: เช็คว่าวันที่ลูปนี้ มีคิวเวรประเภทที่เลือกอยู่หรือไม่
+                let hasShift = allShiftsCache.some(item => {
+                    // ลอจิกแมปพิกัดข้อความวันที่ เช่น "1 พฤษภาคม" ค้นหาคำว่าวันนั้นๆ
+                    let cleanDisplay = item.display.replace(/\s+/g, '');
+                    return cleanDisplay.startsWith(day + "พฤษภาคม") && item.type === selectedType;
+                });
+
+                if (hasShift) {
+                    // กำหนดสีของจุดไฟปฏิทินตามเงื่อนไขคู่สีเวรของอาจารย์
+                    let dotColor = "bg-amber-400"; // เช้าบ่ายดึก
+                    if (selectedType === "บ่ายน้อย") dotColor = "bg-blue-500";
+                    if (selectedType === "SMC") dotColor = "bg-purple-500";
+                    
+                    cell.innerHTML += `<div class="w-1.5 h-1.5 ${dotColor} rounded-full mx-auto mb-0.5"></div>`;
                 }
+
+                // ผูกอีเวนต์: เมื่อเจ้าหน้าที่เอานิ้วจิ้มที่ตัวเลขวัน ให้กางรายชื่อเวรด้านล่างออกมาทันที
+                cell.onclick = () => showDailyRoster(day);
+                grid.appendChild(cell);
+            }
+        }
+
+        // 5. ฟังก์ชันภาพรวม: กางรายชื่อเวร เช้า บ่าย ดึก ประจำวันที่นิ้วโป้งจิ้มเลือก
+        function showDailyRoster(day) {
+            document.getElementById('selected-date-title').innerText = `📋 รายการเวรประจำวันที่ ${day} พฤษภาคม 2569`;
+            const listContainer = document.getElementById('daily-staff-list');
+            listContainer.innerHTML = "";
+
+            // กรองหาแถวเวรทั้งหมดในตู้ Cache ที่ตรงกับวันที่โดนเคาะเลือก
+            let targetShifts = allShiftsCache.filter(item => {
+                let cleanDisplay = item.display.replace(/\s+/g, '');
+                return cleanDisplay.startsWith(day + "พฤษภาคม");
+            });
+
+            if (targetShifts.length === 0) {
+                listContainer.innerHTML = '<div class="text-center py-4 text-slate-400 font-normal">🌴 วันนี้ไม่มีภาระงานเวรนอกเวลาในระบบ</div>';
+                return;
+            }
+
+            // ลูปสาดรายชื่อลงบอร์ดด้านล่างอย่างเป็นระเบียบตามเฉดสีเวร
+            targetShifts.forEach(item => {
+                let badgeColor = "bg-slate-100 text-slate-700";
+                if (item.type === "ชบด") badgeColor = "bg-amber-50 text-amber-800 border border-amber-100";
+                if (item.type === "บ่ายน้อย") badgeColor = "bg-blue-50 text-blue-800 border border-blue-100";
+                if (item.type === "SMC") badgeColor = "bg-purple-50 text-purple-800 border border-purple-100";
+
+                let rowDiv = document.createElement('div');
+                rowDiv.className = `p-3 rounded-xl ${badgeColor} font-medium flex items-center justify-between shadow-sm`;
+                rowDiv.innerHTML = `<span>${item.display}</span> <span class="text-[9px] uppercase tracking-wider font-bold opacity-60">${item.type}</span>`;
+                listContainer.appendChild(rowDiv);
             });
         }
     </script>
 </body>
 </html>
-
