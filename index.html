@@ -1,26 +1,85 @@
-<script>
-    // 🔒 [จุดตั้งค่า] หยอด URL Web App GAS ของอาจารย์ตัวล่าสุดที่กด Deploy
-    const GAS_URL = "https://script.google.com/macros/s/XXXX/exec"; 
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการเวร PharmCNT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    // รหัส Channel ID จากหน้าแผง LINE Developers (LINE Login)
-    const LINE_CLIENT_ID = "2010181979"; 
-    // 🌍 จุดสำคัญ: เพื่อให้สอดคล้องกับระบบของอาจารย์ ตัว REDIRECT_URI จะชี้กลับมาที่หน้าเว็บ GitHub Pages ตัวมันเอง
-    const REDIRECT_URI = "https://wisawatp-create.github.io/pharmcnt-shift/index.html";
+    <style>
+        /* ตกแต่งฟอนต์พื้นฐานเพื่อให้แสดงผลภาษาไทยได้อย่างละมุนบนหน้าจอมือถือ */
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
 
-    // 🔒 ตัวแปรส่วนกลาง (Global State) สำหรับใช้งานข้ามฟาร์มหน้าจอย่อย
-    let myLineUserId = ""; 
-    let myFullName = "";   
-    let myGroup = "";      
-    let allShiftsCache = []; 
+    <div id="app-container" class="max-w-md mx-auto min-h-screen bg-slate-50 relative shadow-2xl shadow-slate-300/50">
+        <div class="flex items-center justify-center min-h-screen p-4 text-slate-500 text-sm">
+            ⏳ กำลังเตรียมความพร้อมระบบ PharmCNT...
+        </div>
+    </div>
 
-    // 🚀 สั่งรันระบบตรวจสอบตั๋วทันทีที่เปิดหน้าเว็บขึ้นมา
-    window.addEventListener('DOMContentLoaded', () => {
-        checkUrlCredentials();
-    });
+    <script>
+        // 🔒 [จุดตั้งค่า] อาจารย์นำ URL ของ Google Apps Script Web App มาใส่ตรงนี้ครับ
+        const CLIENT_ID = "2010181979"; // ไอดี LINE channel ID
+        const REDIRECT_URI = GAS_URL ;//"https://wisawatp-create.github.io/pharmcnt-shift/index.html"; // หน้าเว็บของอาจารย์
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxj4l0Lou5cV1P9D0eZRv12oAsWW9Fx3OQNv7ZkmSUhjskrXx3H_xCesQyFWSQ7XQsQ/exec";
 
-    // =================================================================
-    // 🔍 1. ฟังก์ชันดักจับคิวสิทธิ์ (OAuth Callback & Cookie Guard)
-    // =================================================================
+        // ตัวแปรส่วนกลาง (Global State) สำหรับผูกตัวตนเจ้าหน้าที่ผ่านไลน์ด่านแรก
+        let myLineUserId = ""; // 🎯 กล่องใหม่สำหรับเก็บ LINE User ID เฉพาะบุคคล
+        let myGroup = "";      // จะถูกเติมค่าโดยอัตโนมัติหลังสแกนกลุ่มงานเสร็จ
+        let myFullName = "";   // จะถูกเติมค่าโดยอัตโนมัติหลัง LINE Login สำเร็จ
+        let allShiftsCache = []; // หน่วยความจำสำรองสำหรับเก็บตารางเวรทั้งเดือนเพื่อใช้ในหน้าภาพรวม
+
+        // 🚀 สั่งเปิดระบบให้โหลดหน้าแรก (home.html) ทันทีที่เปิดแอปพลิเคชัน
+        window.addEventListener('DOMContentLoaded', () => {
+            checkUrlCredentials();
+        });
+
+    // 🔍 ฟังก์ชันแกะรอยตรวจสอบตัวตน (เวอร์ชันล้าง URL ป้องกันการวนลูปกลับมาหน้าเดิม)
+    function checkUrlCredentials() {
+        const urlParams = new URLSearchParams(window.location.search);
+        <!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการเวร PharmCNT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* ตกแต่งฟอนต์พื้นฐานเพื่อให้แสดงผลภาษาไทยได้อย่างละมุนบนหน้าจอมือถือ */
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+    <div id="app-container" class="max-w-md mx-auto min-h-screen bg-slate-50 relative shadow-2xl shadow-slate-300/50">
+        <div class="flex items-center justify-center min-h-screen p-4 text-slate-500 text-sm">
+            ⏳ กำลังเตรียมความพร้อมระบบ PharmCNT...
+        </div>
+    </div>
+
+    <script>
+        // 🔒 [จุดตั้งค่า] อาจารย์นำ URL ของ Google Apps Script Web App มาใส่ตรงนี้ครับ
+        const CLIENT_ID = "2010181979"; // ไอดี LINE channel ID
+        const REDIRECT_URI = GAS_URL ;//"https://wisawatp-create.github.io/pharmcnt-shift/index.html"; // หน้าเว็บของอาจารย์
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxj4l0Lou5cV1P9D0eZRv12oAsWW9Fx3OQNv7ZkmSUhjskrXx3H_xCesQyFWSQ7XQsQ/exec";
+
+        // ตัวแปรส่วนกลาง (Global State) สำหรับผูกตัวตนเจ้าหน้าที่ผ่านไลน์ด่านแรก
+        let myLineUserId = ""; // 🎯 กล่องใหม่สำหรับเก็บ LINE User ID เฉพาะบุคคล
+        let myGroup = "";      // จะถูกเติมค่าโดยอัตโนมัติหลังสแกนกลุ่มงานเสร็จ
+        let myFullName = "";   // จะถูกเติมค่าโดยอัตโนมัติหลัง LINE Login สำเร็จ
+        let allShiftsCache = []; // หน่วยความจำสำรองสำหรับเก็บตารางเวรทั้งเดือนเพื่อใช้ในหน้าภาพรวม
+
+        // 🚀 สั่งเปิดระบบให้โหลดหน้าแรก (home.html) ทันทีที่เปิดแอปพลิเคชัน
+        window.addEventListener('DOMContentLoaded', () => {
+            checkUrlCredentials();
+        });
+
+    // 🔍 ฟังก์ชันแกะรอยตรวจสอบตัวตน (เวอร์ชันล้าง URL ป้องกันการวนลูปกลับมาหน้าเดิม)
     function checkUrlCredentials() {
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code'); // LINE จะส่ง ?code=xxx กลับมาที่หน้าเว็บ GitHub
@@ -42,318 +101,905 @@
             // เคสที่ B: เข้าหน้าเว็บตัวเปล่า (หรือล้าง URL ไปแล้ว) ให้เช็คความจำสำรอง
             if (myLineUserId && myLineUserId !== "") {
                 switchPage('home');
-            } else {
-                // 🛠️ โหมดทดสอบสำหรับอาจารย์วิศวัสต์บนเครื่องคอมพิวเตอร์ (Bypass Admin)
-                if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") {
-                    console.log("🛠️ [Admin Mode] จำลองข้อมูลล็อกอินพนักงาน");
-                    myLineUserId = "Ue2837f1be5b9c9a59cd0ac08f4dd76c2";
-                    myFullName = "นายวิศวัสต์ ปาริยะประเสริฐ";
-                    myGroup = "เภสัชกร";
-                    switchPage('home');
-                } else {
-                    // บังคับเด้งเข้าหน้าต่างล็อกอินสีเขียวของ LINE
-                    redirectToLineLogin();
+            } else {                
+                // บังคับเด้งเข้าหน้าต่างล็อกอินสีเขียวของ LINE
+                redirectToLineLogin();
                 }
             }
         }
     }
 
-    // =================================================================
-    // ✈️ 2. ฟังก์ชันพาผู้ใช้พุ่งไปล็อกอินที่หน้าต่างของ LINE
-    // =================================================================
+// 🎯 [ฟังก์ชันใหม่] ยิงไปเช็คใน Sheet ว่า LINE User ID นี้เคยลงทะเบียนไว้หรือยัง?
+function checkUserRegistrationStatus(userId) {
+    const container = document.getElementById('app-container');
+    container.innerHTML = '<div class="flex items-center justify-center min-h-screen text-slate-500 text-sm">⏳ กำลังตรวจสอบประวัติการลงทะเบียน...</div>';
+
+    fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({ 
+            action: "checkUserRegistry", 
+            uid: userId 
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "registered") {
+            // 🎉 เคสที่ 1: เป็นผู้ใช้เก่าที่เคยลงทะเบียนแล้ว 
+            // ให้เขียนทับตัวแปรด้วย "ชื่อจริงภาษาไทย" และ "กลุ่มงานจริง" ที่ดึงมาจาก Google Sheet
+            myFullName = data.fullName; 
+            myGroup = data.group;
+            
+            console.log(`Welcome back: ${myFullName} (${myGroup})`);
+            switchPage('home'); // พาวิ่งเข้าหน้าหลัก 3 ปุ่มทันที
+            
+        } else if (data.status === "not_registered") {
+            // 📝 เคสที่ 2: ตรวจไม่เจอเลข ID นี้ในฐานข้อมูล (พนักงานใหม่)
+            console.log("⚠️ พนักงานใหม่ยังไม่ได้ลงทะเบียน ดีดไปหน้าฟอร์มลงทะเบียน");
+            
+            // อาจารย์สร้างไฟล์ชื่อ register.html ไว้ในโฟลเดอร์ pages/ เพื่อรอรับแรงกระแทกได้เลยครับ
+            switchPage('register'); 
+        }
+    })
+    .catch(err => {
+        console.error("🔴 ตรวจสอบสถานะลงทะเบียนล้มเหลว:", err);
+        container.innerHTML = `<div class="p-4 text-center text-rose-500">❌ ระบบตรวจสอบรายชื่อขัดข้อง: ${err.message}</div>`;
+    });
+}
+    // ✈️ ฟังก์ชันพาวิ่งไปหน้าล็อกอินระบบปิดของ LINE (มาแทนที่ระบบ liff.login)
     function redirectToLineLogin() {
         const state = Math.random().toString(36).substring(7); 
         const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize` +
                             `?response_type=code` +
-                            `&client_id=${LINE_CLIENT_ID}` +
+                            `&client_id=${CLIENT_ID}` +
                             `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
                             `&state=${state}` +
-                            `&scope=profile%20openid`;
+                            `&scope=profile%20openid`; // openid คือตัวบังคับเพื่อขอเลข User ID
                             
         window.location.href = lineAuthUrl;
     }
+    // 👤 ฟังก์ชันแกะกล่องประวัติพนักงานจากเซิร์ฟเวอร์ LINE
+    function getUserLineProfile() {
+        liff.getProfile()
+            .then(profile => {
+                // 🔄 นำชื่อจริงภาษาไทยในไลน์ ยัดใส่โถตัวแปรส่วนกลางของอาจารย์อัตโนมัติ!
+                myFullName = profile.displayName; 
+                
+                // หลังจากได้ชื่อไลน์พนักงานแล้ว ค่อยสั่งวิ่งไปดึงข้อมูลระบุกลุ่มงาน (เภสัชกร/เจ้าพนักงาน) จาก GAS
+                fetchUserGroupFromBackend(myFullName);
+            })
+            .catch(err => {
+                console.error("🔴 ไม่สามารถดึง Profile จาก LINE ได้:", err);
+                switchPage('home'); // ข้ามไปแบบเซฟๆ
+            });
+    }
 
-    // =================================================================
-    // 📥 3. ฟังก์ชันยิง POST ไปแลกเปลี่ยนรหัสและตรวจเช็คประวัติ (ตรงตัวกับ Code.gs)
-    // =================================================================
-    function exchangeCodeForLineId(lineCode) {
-        const container = document.getElementById('app-container');
-        container.innerHTML = '<div class="flex items-center justify-center min-h-screen text-slate-500 text-sm">⏳ กำลังตรวจสอบสิทธิ์ล็อกอินผ่าน LINE...</div>';
-
-        // 🎯 สั่งยิง POST ไปหาเคส "getLineIdFromCode" ของอาจารย์
+    // 🔍 ฟังก์ชันพิเศษ: เอาชื่อไลน์ไปควานหา "กลุ่มงาน" ใน Sheet name_position ล่าสุด
+    function fetchUserGroupFromBackend(fullName) {
         fetch(GAS_URL, {
             method: "POST",
-            body: JSON.stringify({
-                action: "getLineIdFromCode",
-                code: lineCode,
-                redirectUri: REDIRECT_URI
-            })
+            body: JSON.stringify({ action: "checkUserGroup", staffName: fullName })
         })
         .then(res => res.json())
         .then(data => {
-            // โครงสร้างคืนค่าควรส่งกลับมาบอกสถานะ เช่น { status: "registered/not_registered", userId: "...", fullName: "...", group: "..." }
-            if (data.status === "registered") {
-                // 🎉 เป็นพนักงานเก่าที่เคยผูกข้อมูลไว้แล้ว นำค่าจากชีทลงหน่วยความจำแอป
-                myLineUserId = data.userId;
-                myFullName = data.fullName;
-                myGroup = data.group;
-                
-                switchPage('home'); // สั่งเปิดหน้าแดชบอร์ดหลักทันที
-                
-            } else if (data.status === "not_registered") {
-                // 📝 เป็นพนักงานใหม่ ตรวจไม่พบข้อมูลในตาราง ให้ดีดไปหน้าลงทะเบียนผูกรหัส
-                myLineUserId = data.userId; // เก็บ ID รอไว้บันทึก
-                
-                switchPage('register'); // เปิดหน้ากรอกชื่อ-นามสกุลจริง
-            } else {
-                throw new Error(data.message || "การยืนยันตัวตนผิดพลาด");
-            }
+            // ยัดค่ากลุ่มงานที่แสกนเจอ เช่น "เภสัชกร" หรือ "เจ้าพนักงานเภสัชกรรม" เข้าตัวแปรส่วนกลาง
+            myGroup = data.group || "เภสัชกร"; 
+            
+            // เมื่อตัวแปรครบถ้วนสมบูรณ์แล้ว จึงเปิดสิทธิ์ปล่อยตัวให้พนักงานเข้าสู่หน้าหลักอย่างปลอดภัยครับ
+            switchPage('home');
         })
         .catch(err => {
-            container.innerHTML = `<div class="p-6 text-center text-sm text-rose-500">❌ ข้อผิดพลาดด่านล็อกอิน: ${err.message}</div>`;
+            console.error("🔴 แสกนหาคลังกลุ่มงานไม่สำเร็จ:", err);
+            myGroup = "เภสัชกร"; // ค่า Fallback ป้องกันระบบค้าง
+            switchPage('home');
         });
     }
 
-    // =================================================================
-    // 🧠 4. ฟังก์ชันศูนย์รวมลอจิกควบคุมพฤติกรรมปุ่มกดประจำแต่ละหน้าจอ
-    // =================================================================
-    function initPageLogic(pageName) {
-        
-        // [เคสหน้าแรก Home]
-        if (pageName === 'home') {
-            const nameEl = document.getElementById('user-profile-name');
-            const groupEl = document.getElementById('user-profile-group');
-            if (nameEl) nameEl.innerText = myFullName;
-            if (groupEl) groupEl.innerText = myGroup;
-
-            document.getElementById('btn-goto-next').onclick = () => switchPage('form-next');
-            document.getElementById('btn-goto-now').onclick = () => switchPage('form-now');
-            document.getElementById('btn-goto-overview').onclick = () => switchPage('overview');
-        }
-        
-        // [เคสหน้าลงทะเบียนพนักงานใหม่ Register]
-        if (pageName === 'register') {
-            document.getElementById('btn-submit-register').onclick = function() {
-                const fullNameInput = document.getElementById('reg-fullname').value.trim();
-                const groupSelect = document.getElementById('reg-group').value;
-
-                if (fullNameInput === "" || groupSelect === "") {
-                    alert("⚠️ กรุณากรอกชื่อจริงและระบุกลุ่มงานปฏิบัติงานให้ครบถ้วนครับ");
-                    return;
-                }
-
-                // 🎯 สั่งยิง POST ไปหาเคส "registerUser" ของอาจารย์
-                fetch(GAS_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "registerUser",
-                        lineUserId: myLineUserId,
-                        fullName: fullNameInput,
-                        group: groupSelect
-                    })
+        // 🔄 ฟังก์ชันอัจฉริยะสำหรับดูดไฟล์ HTML ข้ามฝั่งมาเปิดสลับแสดงผลบนหน้าจอ
+        function switchPage(pageName) {
+            const container = document.getElementById('app-container');
+            
+            // วิ่งไป Fetch ข้อความดิบจากไฟล์ย่อยในโฟลเดอร์ pages/ บน GitHub
+            fetch(`pages/${pageName}.html`)
+                .then(res => {
+                    if (!res.ok) throw new Error("ไม่สามารถโหลดโครงสร้างหน้าจอแยกไฟล์ได้");
+                    return res.text();
                 })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        alert("🎉 ลงทะเบียนผูกบัญชีสำเร็จเรียบร้อยครับ!");
-                        myFullName = fullNameInput;
-                        myGroup = groupSelect;
-                        switchPage('home'); // ปล่อยตัวเข้าหน้าหลัก
-                    } else {
-                        alert("❌ ลงทะเบียนไม่สำเร็จ: " + data.message);
-                    }
+                .then(htmlContent => {
+                    // สาดเนื้อหา HTML ย่อยเข้าสู่กล่องกลางหน้าแอป
+                    container.innerHTML = htmlContent;
+                    
+                    // 🔥 ปลุกพลังลอจิกควบคุมปุ่มให้เหมาะสมกับประเภทหน้าจอนั้นๆ ทันที
+                    initPageLogic(pageName);
+                })
+                .catch(err => {
+                    container.innerHTML = `
+                        <div class="p-6 text-center text-sm font-semibold text-rose-500">
+                            ❌ เกิดข้อผิดพลาดในการโหลดหน้าจอ: ${err.message}
+                        </div>`;
                 });
-            };
         }
 
-        // [เคสงานเดือนหน้า Form-Next]
-        if (pageName === 'form-next') {
-            setupDynamicMonths(); // ฟังก์ชันคำนวณเดือนอัตโนมัติ
-            document.getElementById('btn-back').onclick = () => switchPage('home');
-            document.getElementById('swap-type').onchange = () => loadUserAvailableShifts('form-next');
-        }
-
-        // [เคสงานเดือนปัจจุบัน Form-Now]
-        if (pageName === 'form-now') {
-            setupDynamicMonths();
-            document.getElementById('btn-back').onclick = () => switchPage('home');
-            document.getElementById('swap-type').onchange = () => loadUserAvailableShifts('form-now');
-        }
-
-        // [เคสหน้าปฏิทินภาพรวม Overview]
-        if (pageName === 'overview') {
-            document.getElementById('btn-back-home').onclick = () => switchPage('home');
+       
+       // =======================================================
+        // 🧠 ปรับปรุงฟังก์ชันศูนย์รวมลอจิก (ฉบับปลอดภัย ป้องกัน Null Property)
+        // =======================================================
+        function initPageLogic(pageName) {
             
-            //ดึงฐานปฏิทินรวมเดือน (อาจารย์เขียนดัก action: "getAllMonthlyShifts" เพิ่มฝั่ง GAS ได้ครับ)
-            fetchOverviewDataAndRender(); 
+            // 🏠 เคสหน้าจอหลัก (Home / Dashboard)
+            if (pageName === 'home') {
+                const btnNext = document.getElementById('btn-goto-next');
+                const btnNow = document.getElementById('btn-goto-now');
+                const btnOverview = document.getElementById('btn-goto-overview');
+        
+                // 🔒 ตรวจสอบความปลอดภัย: ถ้าปุ่มเดินทางมาถึง DOM หน้าจอครบแล้ว ค่อยผูกคำสั่ง onclick
+                if (btnNext) btnNext.onclick = () => switchPage('form-next');
+                if (btnNow) btnNow.onclick = () => switchPage('form-now');
+                if (btnOverview) btnOverview.onclick = () => switchPage('overview');
+            }
             
-            const tabs = document.querySelectorAll('.tab-filter');
-            tabs.forEach(tab => {
-                tab.onclick = function() {
-                    tabs.forEach(t => t.className = "tab-filter text-slate-600 font-medium py-2.5 px-1 rounded-xl text-xs text-center transition-all duration-150");
-                    this.className = "tab-filter bg-white text-indigo-700 font-bold py-2.5 px-1 rounded-xl text-xs text-center shadow-sm transition-all duration-150";
-                    renderCalendarGrid(this.innerText.trim());
-                };
-            });
+            // 🟢 เคสงานบันทึกเวรล่วงหน้า (เดือนหน้า)
+            if (pageName === 'form-next') {
+                const btnBack = document.getElementById('btn-back');
+                const typeSelect = document.getElementById('swap-type');
+                const shiftSelect = document.getElementById('swap-shift-select');
+        
+                if (btnBack) btnBack.onclick = () => switchPage('home');
+                if (typeSelect) {
+                    typeSelect.onchange = function() {
+                        loadUserAvailableShifts('form-next');
+                    };
+                }
+                if (shiftSelect) {
+                    shiftSelect.onchange = function() {
+                        const submitBtn = document.getElementById('btn-submit-next');
+                        if (!submitBtn) return;
+                        if (this.value !== "") {
+                            submitBtn.disabled = false;
+                            submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-4 rounded-2xl shadow-lg transform active:scale-[0.99] transition-all flex items-center justify-center space-x-2";
+                        } else {
+                            submitBtn.disabled = true;
+                            submitBtn.className = "w-full bg-slate-300 text-slate-500 font-bold p-4 rounded-2xl cursor-not-allowed flex items-center justify-center space-x-2";
+                        }
+                    };
+                }
+            }
+        
+            // 🔵 เคสงานจัดการ/เปลี่ยนผลัดเวร (เดือนปัจจุบัน)
+            if (pageName === 'form-now') {
+                // 🔥 [สั่งงานเพิ่ม] ควบระบบคำนวณพ่นเดือน Dynamic ทันทีที่เปิดหน้าฟอร์มนี้เข้ามา
+                setupDynamicMonths();
+                
+                const btnBack = document.getElementById('btn-back');
+                const typeSelect = document.getElementById('swap-type');
+                
+                if (btnBack) btnBack.onclick = () => switchPage('home');
+                if (typeSelect) {
+                    typeSelect.onchange = function() {
+                        loadUserAvailableShifts('form-now');
+                    };
+                }
+            }
+        
+            // 🟠 เคสหน้าจอภาพรวมตารางรวมเดือน (มินิปฏิทินจุดสี)
+            if (pageName === 'overview') {
+                const btnBackHome = document.getElementById('btn-back-home');
+                if (btnBackHome) btnBackHome.onclick = () => switchPage('home');
+                
+                // รันฟังก์ชันดึงฐานข้อมูลภาพรวมมาเรนเดอร์จุดสี
+                fetchOverviewDataAndRender();
+                
+                // ผูกสิทธิ์แท็บเม็ดยา 3 ประเภทเวร
+                const tabs = document.querySelectorAll('.tab-filter');
+                if (tabs.length > 0) {
+                    tabs.forEach(tab => {
+                        tab.onclick = function() {
+                            tabs.forEach(t => {
+                                t.className = "tab-filter text-slate-600 font-medium py-2.5 px-1 rounded-xl text-xs text-center transition-all duration-150";
+                            });
+                            this.className = "tab-filter bg-white text-indigo-700 font-bold py-2.5 px-1 rounded-xl text-xs text-center shadow-sm transition-all duration-150";
+                            renderCalendarGrid(this.innerText.trim());
+                        };
+                    });
+                }
+            }
         }
-    }
 
-    // =================================================================
-    // 🛠️ 5. คลังฟังก์ชันเชื่อมโยงข้อมูลสัมภาระ (สอดรับกับ Switch Case ของอาจารย์)
-    // =================================================================
-    
-    // กวาดคิวเวรในตารางชีท ➡️ สั่งยิงเข้าเคส "getAvailableShifts" ของอาจารย์เป๊ะๆ
-    function loadUserAvailableShifts(mode) {
-        const monthSelect = document.getElementById('swap-month');
-        const month = monthSelect.value;
-        const type = document.getElementById('swap-type').value;
-        const sSelect = document.getElementById('swap-shift-select');
-
-        if (!type) {
-            sSelect.innerHTML = '<option value="">-- กรุณาเลือกประเภทเวรก่อน --</option>';
-            sSelect.disabled = true;
-            return;
-        }
-
-        sSelect.innerHTML = "<option>⏳ กำลังสืบค้นตารางเวรจากระบบ...</option>";
-        sSelect.disabled = true;
-
-        // 🎯 แพ็ก Payload ส่งแบบ POST มุ่งตรงไปหา case "getAvailableShifts" 
-        fetch(GAS_URL, {
-            method: "POST",
-            body: JSON.stringify({ 
-                action: "getAvailableShifts", 
-                sheetName: type,                    
-                targetMonth: month,
-                group: myGroup
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            sSelect.innerHTML = '<option value="">-- เลือกรายการวันปฏิบัติงานในตาราง --</option>';
+        // -------------------------------------------------------------
+        // 🛠️ คลังฟังก์ชันเชื่อมต่อสคริปต์หลังบ้าน (Core Integration Functions)
+        // -------------------------------------------------------------
+        
+        // 1. ฟังก์ชันกวาดข้อมูลคิวเวรจากตารางชีท (ใช้ร่วมกันทั้งเดือนปัจจุบันและเดือนหน้า)
+        function loadUserAvailableShifts(mode) {
+            const monthSelect = document.getElementById('swap-month');
+            const month = monthSelect.value;
+            const monthText = (mode === 'form-next') ? "เดือนถัดไป" : monthSelect.options[monthSelect.selectedIndex].text;
             
-            // รองรับโครงสร้างอาร์เรย์ที่ส่งกลับมาจาก GAS
-            const shiftsList = Array.isArray(data) ? data : (data.shifts || []);
-            
-            if (shiftsList.length === 0) {
-                sSelect.innerHTML = '<option value="">❌ ไม่พบข้อมูลภาระงานเวรประเภทนี้ในตาราง</option>';
+            const type = document.getElementById('swap-type').value;
+            const sSelect = document.getElementById('swap-shift-select');
+            const subSelect = document.getElementById('swap-substitute');
+
+            if (!type) {
+                sSelect.innerHTML = '<option value="">-- กรุณาเลือกประเภทเวรก่อน --</option>';
+                sSelect.disabled = true;
                 return;
             }
 
-            shiftsList.forEach(item => {
-                let opt = document.createElement('option');
-                opt.value = item.row;         
-                opt.innerText = item.display; 
-                sSelect.appendChild(opt);
-            });
-            sSelect.disabled = false;
+            sSelect.innerHTML = "<option>⏳ กำลังกวาดฐานคิวเวรในระบบ...</option>";
+            sSelect.disabled = true;
 
-            sSelect.onchange = function() {
-                const monthText = monthSelect.options[monthSelect.selectedIndex].text;
-                unlockAndLoadSubstitute(monthText, this.options[this.selectedIndex].text);
-            };
-        })
-        .catch(err => {
-            sSelect.innerHTML = `<option value="">❌ ค้นหาล้มเหลว: ${err.message}</option>`;
-        });
+            // ยิง Fetch จัดส่งพัสดุ Payload ไปหา GAS หลังบ้าน
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ 
+                    action: "getAvailableShifts", 
+                    sheetName: type,                    
+                    targetMonth: month,
+                    group: myGroup
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const shiftsList = (data && data.shifts) ? data.shifts : data;
+                sSelect.innerHTML = '<option value="">-- เลือกรายการวันปฏิบัติงานในตาราง --</option>';
+                
+                if (!Array.isArray(shiftsList) || shiftsList.length === 0) {
+                    sSelect.innerHTML = '<option value="">❌ เดือนนี้ไม่มีข้อมูลเวรประเภทนี้ในระบบ</option>';
+                    return;
+                }
+
+                shiftsList.forEach(item => {
+                    let opt = document.createElement('option');
+                    opt.value = item.row;         
+                    opt.innerText = item.display; 
+                    sSelect.appendChild(opt);
+                });
+                sSelect.disabled = false;
+
+                // ผูกเหตุการณ์: เมื่อกดคลิกเลือกเวรเดิมในช่อง 3 ค่อยส่งไม้ต่อให้ช่อง 4 ทำงานต่ออย่างเป็นระบบ
+                sSelect.onchange = function() {
+                    unlockAndLoadSubstitute(monthText, this.options[this.selectedIndex].text);
+                };
+            })
+            .catch(err => {
+                sSelect.innerHTML = `<option value="">❌ ระบบขัดข้อง: ${err.message}</option>`;
+            });
+        }
+
+        // 2. ฟังก์ชันปลดล็อกช่องที่ 4 + ดักจับสกัดรายชื่อซ้ำด้วยการบดขยี้เว้นวรรค
+        function unlockAndLoadSubstitute(monthText, selectedShiftText) {
+            const subSelect = document.getElementById('swap-substitute');
+            if (!subSelect) return; // หากเป็นฟอร์มเดือนหน้าที่ซ่อนค่าไว้ ให้ผ่านลอจิกนี้ไปได้เลย
+            
+            if (!selectedShiftText || selectedShiftText.includes("-- เลือกรายการวันปฏิบัติงาน")) {
+                subSelect.innerHTML = '<option value="">-- กรุณาเลือกรายการวันปฏิบัติงานในข้อ 3 ก่อน --</option>';
+                subSelect.disabled = true;
+                return;
+            }
+
+            // มาตรการล็อกช่อง 4 อัตโนมัติหากหน้าเว็บสลัดไปเจอเคส "เดือนถัดไป"
+            if (monthText.indexOf("เดือนถัดไป") !== -1) {
+                subSelect.innerHTML = '<option value="**ขึ้นปฏิบัติงานเอง**">**ขึ้นปฏิบัติงานเอง**</option>';
+                subSelect.disabled = true;
+                return;
+            }
+
+            subSelect.disabled = true;
+            subSelect.innerHTML = "<option>⏳ กำลังดึงรายชื่อเฉพาะในกลุ่มงาน...</option>";
+
+            let compareOriginalName = ""; 
+            if (selectedShiftText.includes(" - ")) {
+                let originalStaffName = selectedShiftText.split(" - ")[1].trim();
+                // 🔒 บดขยี้เว้นวรรคทุกจุดของชื่อเจ้าของเวรเดิม ป้องกันบั๊กเคาะวรรคสั้นยาวไม่เท่ากันใน Sheet
+                compareOriginalName = originalStaffName.replace(/\s+/g, '');
+            }
+
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getStaffNamesList", group: myGroup })
+            })
+            .then(res => res.json())
+            .then(data => {
+                subSelect.innerHTML = '<option value="">-- เลือกชื่อผู้ปฏิบัติงานแทน --</option>';
+                
+                // 1. เพิ่มตัวเลือกขึ้่นเองไว้บนสุดเสมอเพื่อความสะดวกตามหน้างานของอาจารย์
+                let defaultOpt = document.createElement('option');
+                defaultOpt.value = "**ขึ้นปฏิบัติงานเอง**";
+                defaultOpt.innerText = "**ขึ้นปฏิบัติงานเอง**";
+                subSelect.appendChild(defaultOpt);
+
+                // 2. ลูปรายชื่อคนในแผนกที่ดึงมาจากคลังชีท name_position
+                data.names.forEach(name => {
+                    if (!name) return;
+                    const cleanName = name.trim();
+                    const compareCleanName = cleanName.replace(/\s+/g, ''); 
+                    
+                    // สั่งคัดกรอง: รายชื่อที่จะแสดงต้องไม่ชนกับชื่อเดิมที่ครองเวรนั้นอยู่เด็ดขาด
+                    if (compareCleanName !== compareOriginalName) { 
+                        let opt = document.createElement('option');
+                        opt.value = cleanName;
+                        opt.innerText = cleanName;
+                        subSelect.appendChild(opt);
+                    }
+                });
+                subSelect.disabled = false; 
+            })
+            .catch(err => {
+                subSelect.innerHTML = `<option value="">❌ โหลดรายชื่อล้มเหลว: ${err.message}</option>`;
+            });
+        }
+
+        // 3. ฟังก์ชันภาพรวม: โฮสต์ขอดึงคลังเวรดิบทั้งเดือนมากักเก็บไว้ในหน่วยความจำ (Cache)
+        function fetchOverviewDataAndRender() {
+            const mSelect = document.getElementById('overview-month');
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '<div class="col-span-7 py-6 text-slate-400 text-xs animate-pulse">⏳ กำลังเชื่อมต่อคลังตารางรวมเดือน...</div>';
+            
+            // ยิง Fetch ดึงข้อมูลประมวลผลตารางรวมเดือนรอบเดียวจบ
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getAllMonthlyShifts", targetMonth: mSelect.value, group: myGroup })
+            })
+            .then(res => res.json())
+            .then(data => {
+                allShiftsCache = data.shifts || []; // บันทึกข้อมูลใส่ตู้ Cache หน้าบ้าน
+                renderCalendarGrid("เช้าบ่ายดึก"); // วาดปฏิทินปักหมุดจุดสีโดยเริ่มต้นที่เวรหลักก่อน
+            })
+            .catch(err => {
+                grid.innerHTML = `<div class="col-span-7 py-4 text-xs text-rose-500">❌ โหลดคลังตารางพลาด: ${err.message}</div>`;
+            });
+
+            mSelect.onchange = fetchOverviewDataAndRender; // สั่งโหลดซ้ำหากมีการขยับเปลี่ยนเดือนส่องดู
+        }
+
+        // 4. ฟังก์ชันภาพรวม: เครื่องยนต์คำนวณวันและวาดจุดสีลงช่องมินิปฏิทินประจำเดือน
+        function renderCalendarGrid(selectedType) {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = ""; // เคลียร์ปฏิทินเก่า
+            
+            // วาดบล็อกช่องวันที่จำลอง 1-31 (อาจารย์สามารถขยายโลจิกคำนวณวันว่าง/วันเริ่มต้นของเดือนเพิ่มตรงนี้ได้ครับ)
+            for (let day = 1; day <= 31; day++) {
+                let cell = document.createElement('div');
+                cell.className = "py-2 bg-slate-50 hover:bg-slate-200/50 rounded-xl cursor-pointer transition-all flex flex-col justify-between h-11 border border-slate-100/40 relative";
+                cell.innerHTML = `<span>${day}</span>`;
+                
+                // 🔍 สแกนควานหาในตู้ Cache: เช็คว่าวันที่ลูปนี้ มีคิวเวรประเภทที่เลือกอยู่หรือไม่
+                let hasShift = allShiftsCache.some(item => {
+                    // ลอจิกแมปพิกัดข้อความวันที่ เช่น "1 พฤษภาคม" ค้นหาคำว่าวันนั้นๆ
+                    let cleanDisplay = item.display.replace(/\s+/g, '');
+                    return cleanDisplay.startsWith(day + "พฤษภาคม") && item.type === selectedType;
+                });
+
+                if (hasShift) {
+                    // กำหนดสีของจุดไฟปฏิทินตามเงื่อนไขคู่สีเวรของอาจารย์
+                    let dotColor = "bg-amber-400"; // เช้าบ่ายดึก
+                    if (selectedType === "บ่ายน้อย") dotColor = "bg-blue-500";
+                    if (selectedType === "SMC") dotColor = "bg-purple-500";
+                    
+                    cell.innerHTML += `<div class="w-1.5 h-1.5 ${dotColor} rounded-full mx-auto mb-0.5"></div>`;
+                }
+
+                // ผูกอีเวนต์: เมื่อเจ้าหน้าที่เอานิ้วจิ้มที่ตัวเลขวัน ให้กางรายชื่อเวรด้านล่างออกมาทันที
+                cell.onclick = () => showDailyRoster(day);
+                grid.appendChild(cell);
+            }
+        }
+
+        // 5. ฟังก์ชันภาพรวม: กางรายชื่อเวร เช้า บ่าย ดึก ประจำวันที่นิ้วโป้งจิ้มเลือก
+        function showDailyRoster(day) {
+            document.getElementById('selected-date-title').innerText = `📋 รายการเวรประจำวันที่ ${day} พฤษภาคม 2569`;
+            const listContainer = document.getElementById('daily-staff-list');
+            listContainer.innerHTML = "";
+
+            // กรองหาแถวเวรทั้งหมดในตู้ Cache ที่ตรงกับวันที่โดนเคาะเลือก
+            let targetShifts = allShiftsCache.filter(item => {
+                let cleanDisplay = item.display.replace(/\s+/g, '');
+                return cleanDisplay.startsWith(day + "พฤษภาคม");
+            });
+
+            if (targetShifts.length === 0) {
+                listContainer.innerHTML = '<div class="text-center py-4 text-slate-400 font-normal">🌴 วันนี้ไม่มีภาระงานเวรนอกเวลาในระบบ</div>';
+                return;
+            }
+
+            // ลูปสาดรายชื่อลงบอร์ดด้านล่างอย่างเป็นระเบียบตามเฉดสีเวร
+            targetShifts.forEach(item => {
+                let badgeColor = "bg-slate-100 text-slate-700";
+                if (item.type === "ชบด") badgeColor = "bg-amber-50 text-amber-800 border border-amber-100";
+                if (item.type === "บ่ายน้อย") badgeColor = "bg-blue-50 text-blue-800 border border-blue-100";
+                if (item.type === "SMC") badgeColor = "bg-purple-50 text-purple-800 border border-purple-100";
+
+                let rowDiv = document.createElement('div');
+                rowDiv.className = `p-3 rounded-xl ${badgeColor} font-medium flex items-center justify-between shadow-sm`;
+                rowDiv.innerHTML = `<span>${item.display}</span> <span class="text-[9px] uppercase tracking-wider font-bold opacity-60">${item.type}</span>`;
+                listContainer.appendChild(rowDiv);
+            });
+        }
+        // =======================================================
+        // 📅 ฟังก์ชันคำนวณเดือนปัจจุบันและเดือนถัดไปแบบอัตโนมัติ (Dynamic Month Setup)
+        // =======================================================
+        function setupDynamicMonths() {
+            const monthSelect = document.getElementById('swap-month');
+            if (!monthSelect) return; // ป้องกันบั๊ก Null หากหน้าจอเดินทางมาไม่ถึง
+        
+            const thMonths = [
+                "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+                "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+            ];
+        
+            // 1. ดึงวันเวลาปัจจุบันจากระบบเครื่องผู้ใช้งาน
+            const now = new Date();
+            const currentMonthIdx = now.getMonth(); // 0 = ม.ค. , 11 = ธ.ค.
+            const currentYearBE = now.getFullYear() + 543; // แปลง ค.ศ. เป็น พ.ศ.
+        
+            // 2. คำนวณหาเดือนถัดไป (ดักบั๊กกรณีข้ามปี: ถ้าปัจจุบันเป็น ธ.ค. เดือนถัดไปจะเป็น ม.ค. ปีถัดไป)
+            let nextMonthIdx = currentMonthIdx + 1;
+            let nextYearBE = currentYearBE;
+            if (nextMonthIdx > 11) {
+                nextMonthIdx = 0;
+                nextYearBE += 1;
+            }
+        
+            // 3. จัดแจงโครงสร้าง Option ประกอบร่างภาษาไทย
+            const currentMonthText = `${thMonths[currentMonthIdx]}`;
+            const currentMonthDisplay = `${thMonths[currentMonthIdx]} ${currentYearBE} (เดือนปัจจุบัน)`;
+        
+            const nextMonthText = `${thMonths[nextMonthIdx]}`;
+            const nextMonthDisplay = `${thMonths[nextMonthIdx]} ${nextYearBE} (เดือนถัดไป)`;
+        
+            // 4. พ่นข้อมูลลงสู่ Dropdown บนหน้าฟอร์ม
+            monthSelect.innerHTML = `
+                <option value="${currentMonthText}" selected>${currentMonthDisplay}</option>
+                <option value="${nextMonthText}">${nextMonthDisplay}</option>
+            `;
+        }
+    </script>
+</body>
+</html>
     }
 
-    // ดึงรายชื่อพนักงานในกลุ่มงาน ➡️ สั่งยิงเข้าเคส "getStaffNamesList" ของอาจารย์เป๊ะๆ
-    function unlockAndLoadSubstitute(monthText, selectedShiftText) {
-        const subSelect = document.getElementById('swap-substitute');
-        const submitBtn = document.getElementById('btn-submit-now') || document.getElementById('btn-submit-next');
-        if (!subSelect) return; 
+// 🎯 [ฟังก์ชันใหม่] ยิงไปเช็คใน Sheet ว่า LINE User ID นี้เคยลงทะเบียนไว้หรือยัง?
+function checkUserRegistrationStatus(userId) {
+    const container = document.getElementById('app-container');
+    container.innerHTML = '<div class="flex items-center justify-center min-h-screen text-slate-500 text-sm">⏳ กำลังตรวจสอบประวัติการลงทะเบียน...</div>';
 
-        if (!selectedShiftText || selectedShiftText.includes("-- เลือกรายการวันปฏิบัติงาน")) {
-            subSelect.innerHTML = '<option value="">-- กรุณาเลือกรายการคิวเวรในข้อ 3 ก่อน --</option>';
-            subSelect.disabled = true;
-            return;
+    fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({ 
+            action: "checkUserRegistry", 
+            uid: userId 
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "registered") {
+            // 🎉 เคสที่ 1: เป็นผู้ใช้เก่าที่เคยลงทะเบียนแล้ว 
+            // ให้เขียนทับตัวแปรด้วย "ชื่อจริงภาษาไทย" และ "กลุ่มงานจริง" ที่ดึงมาจาก Google Sheet
+            myFullName = data.fullName; 
+            myGroup = data.group;
+            
+            console.log(`Welcome back: ${myFullName} (${myGroup})`);
+            switchPage('home'); // พาวิ่งเข้าหน้าหลัก 3 ปุ่มทันที
+            
+        } else if (data.status === "not_registered") {
+            // 📝 เคสที่ 2: ตรวจไม่เจอเลข ID นี้ในฐานข้อมูล (พนักงานใหม่)
+            console.log("⚠️ พนักงานใหม่ยังไม่ได้ลงทะเบียน ดีดไปหน้าฟอร์มลงทะเบียน");
+            
+            // อาจารย์สร้างไฟล์ชื่อ register.html ไว้ในโฟลเดอร์ pages/ เพื่อรอรับแรงกระแทกได้เลยครับ
+            switchPage('register'); 
         }
+    })
+    .catch(err => {
+        console.error("🔴 ตรวจสอบสถานะลงทะเบียนล้มเหลว:", err);
+        container.innerHTML = `<div class="p-4 text-center text-rose-500">❌ ระบบตรวจสอบรายชื่อขัดข้อง: ${err.message}</div>`;
+    });
+}
+    // ✈️ ฟังก์ชันพาวิ่งไปหน้าล็อกอินระบบปิดของ LINE (มาแทนที่ระบบ liff.login)
+    function redirectToLineLogin() {
+        const state = Math.random().toString(36).substring(7); 
+        const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize` +
+                            `?response_type=code` +
+                            `&client_id=${CLIENT_ID}` +
+                            `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+                            `&state=${state}` +
+                            `&scope=profile%20openid`; // openid คือตัวบังคับเพื่อขอเลข User ID
+                            
+        window.location.href = lineAuthUrl;
+    }
+    // 👤 ฟังก์ชันแกะกล่องประวัติพนักงานจากเซิร์ฟเวอร์ LINE
+    function getUserLineProfile() {
+        liff.getProfile()
+            .then(profile => {
+                // 🔄 นำชื่อจริงภาษาไทยในไลน์ ยัดใส่โถตัวแปรส่วนกลางของอาจารย์อัตโนมัติ!
+                myFullName = profile.displayName; 
+                
+                // หลังจากได้ชื่อไลน์พนักงานแล้ว ค่อยสั่งวิ่งไปดึงข้อมูลระบุกลุ่มงาน (เภสัชกร/เจ้าพนักงาน) จาก GAS
+                fetchUserGroupFromBackend(myFullName);
+            })
+            .catch(err => {
+                console.error("🔴 ไม่สามารถดึง Profile จาก LINE ได้:", err);
+                switchPage('home'); // ข้ามไปแบบเซฟๆ
+            });
+    }
 
-        // ระบบ Auto-Lock ข้อ 4 ให้ข้ามกรณีขึ้นปฏิบัติงานเองล่วงหน้าของเดือนถัดไป
-        if (monthText.includes("เดือนถัดไป")) {
-            subSelect.innerHTML = '<option value="**ขึ้นปฏิบัติงานเอง**">**ขึ้นปฏิบัติงานเอง**</option>';
-            subSelect.disabled = true;
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.className = "w-full bg-emerald-500 text-white font-bold p-4 rounded-2xl shadow-lg transform active:scale-[0.99] transition-all flex items-center justify-center space-x-2";
-            }
-            return;
-        }
-
-        subSelect.disabled = true;
-        subSelect.innerHTML = "<option>⏳ กำลังโหลดรายชื่อเพื่อนร่วมงาน...</option>";
-
-        let compareOriginalName = ""; 
-        if (selectedShiftText.includes(" - ")) {
-            compareOriginalName = selectedShiftText.split(" - ")[1].trim().replace(/\s+/g, '');
-        }
-
-        // 🎯 สั่งยิง POST มุ่งตรงไปหา case "getStaffNamesList"
+    // 🔍 ฟังก์ชันพิเศษ: เอาชื่อไลน์ไปควานหา "กลุ่มงาน" ใน Sheet name_position ล่าสุด
+    function fetchUserGroupFromBackend(fullName) {
         fetch(GAS_URL, {
             method: "POST",
-            body: JSON.stringify({ action: "getStaffNamesList", group: myGroup })
+            body: JSON.stringify({ action: "checkUserGroup", staffName: fullName })
         })
         .then(res => res.json())
         .then(data => {
-            subSelect.innerHTML = '<option value="">-- เลือกชื่อผู้ปฏิบัติงานแทน --</option>';
+            // ยัดค่ากลุ่มงานที่แสกนเจอ เช่น "เภสัชกร" หรือ "เจ้าพนักงานเภสัชกรรม" เข้าตัวแปรส่วนกลาง
+            myGroup = data.group || "เภสัชกร"; 
             
-            let defaultOpt = document.createElement('option');
-            defaultOpt.value = "**ขึ้นปฏิบัติงานเอง**";
-            defaultOpt.innerText = "**ขึ้นปฏิบัติงานเอง**";
-            subSelect.appendChild(defaultOpt);
-
-            // รอรับรายชื่ออาร์เรย์ย่อยพ่นลง Dropdown
-            const namesList = Array.isArray(data) ? data : (data.names || []);
-            namesList.forEach(name => {
-                if (!name) return;
-                const cleanName = name.trim();
-                if (cleanName.replace(/\s+/g, '') !== compareOriginalName) { 
-                    let opt = document.createElement('option');
-                    opt.value = cleanName;
-                    opt.innerText = cleanName;
-                    subSelect.appendChild(opt);
-                }
-            });
-            subSelect.disabled = false; 
+            // เมื่อตัวแปรครบถ้วนสมบูรณ์แล้ว จึงเปิดสิทธิ์ปล่อยตัวให้พนักงานเข้าสู่หน้าหลักอย่างปลอดภัยครับ
+            switchPage('home');
+        })
+        .catch(err => {
+            console.error("🔴 แสกนหาคลังกลุ่มงานไม่สำเร็จ:", err);
+            myGroup = "เภสัชกร"; // ค่า Fallback ป้องกันระบบค้าง
+            switchPage('home');
         });
     }
 
-    // ฟังก์ชันย่อยสลับเปลี่ยนโครงสร้าง SPA (Single Page Application)
-    function switchPage(pageName) {
-        const container = document.getElementById('app-container');
-        fetch(`pages/${pageName}.html`)
-            .then(res => { if (!res.ok) throw new Error(); return res.text(); })
-            .then(htmlContent => {
-                container.innerHTML = htmlContent;
-                initPageLogic(pageName);
-            })
-            .catch(() => {
-                container.innerHTML = '<div class="p-4 text-center text-rose-500">❌ โหลดหน้าจอขัดข้อง</div>';
-            });
-    }
-
-    // ฟังก์ชันคำนวณเดือนอัตโนมัติ (Dynamic Month Generator)
-    function setupDynamicMonths() {
-        const monthSelect = document.getElementById('swap-month');
-        if (!monthSelect) return;
-        const thMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-        const now = new Date();
-        const curM = now.getMonth();
-        const curY = now.getFullYear() + 543;
-        let nM = curM + 1; let nY = curY; if (nM > 11) { nM = 0; nY += 1; }
-        
-        // ถ้าหน้าจอที่เรนเดอร์อยู่คือ ฟอร์มเดือนหน้า (form-next) ให้ล็อก Dropdown เลือกเป็นเดือนถัดไปทันที
-        if (document.getElementById('display-next-month')) {
-            monthSelect.innerHTML = `<option value="${thMonths[nM]}" selected>${thMonths[nM]}</option>`;
-            return;
+        // 🔄 ฟังก์ชันอัจฉริยะสำหรับดูดไฟล์ HTML ข้ามฝั่งมาเปิดสลับแสดงผลบนหน้าจอ
+        function switchPage(pageName) {
+            const container = document.getElementById('app-container');
+            
+            // วิ่งไป Fetch ข้อความดิบจากไฟล์ย่อยในโฟลเดอร์ pages/ บน GitHub
+            fetch(`pages/${pageName}.html`)
+                .then(res => {
+                    if (!res.ok) throw new Error("ไม่สามารถโหลดโครงสร้างหน้าจอแยกไฟล์ได้");
+                    return res.text();
+                })
+                .then(htmlContent => {
+                    // สาดเนื้อหา HTML ย่อยเข้าสู่กล่องกลางหน้าแอป
+                    container.innerHTML = htmlContent;
+                    
+                    // 🔥 ปลุกพลังลอจิกควบคุมปุ่มให้เหมาะสมกับประเภทหน้าจอนั้นๆ ทันที
+                    initPageLogic(pageName);
+                })
+                .catch(err => {
+                    container.innerHTML = `
+                        <div class="p-6 text-center text-sm font-semibold text-rose-500">
+                            ❌ เกิดข้อผิดพลาดในการโหลดหน้าจอ: ${err.message}
+                        </div>`;
+                });
         }
-        monthSelect.innerHTML = `
-            <option value="${thMonths[curM]}" selected>${thMonths[curM]} ${curY} (เดือนปัจจุบัน)</option>
-            <option value="${thMonths[nM]}">${thMonths[nM]} ${nY} (เดือนถัดไป)</option>`;
-    }
 
-    // ฟังก์ชันดึงประวัติปฏิทินตารางรวมเดือนดักสำรองไว้
-    function fetchOverviewDataAndRender() { /* โค้ดดึง Cache พ่นปฏิทินภาพรวมวนลูปจุดสีรันตามปกติ */ }
-    function renderCalendarGrid(selectedType) { /* โค้ดลูปช่องวันที่ 1-31 รันตามปกติ */ }
-</script>
+       
+       // =======================================================
+        // 🧠 ปรับปรุงฟังก์ชันศูนย์รวมลอจิก (ฉบับปลอดภัย ป้องกัน Null Property)
+        // =======================================================
+        function initPageLogic(pageName) {
+            
+            // 🏠 เคสหน้าจอหลัก (Home / Dashboard)
+            if (pageName === 'home') {
+                const btnNext = document.getElementById('btn-goto-next');
+                const btnNow = document.getElementById('btn-goto-now');
+                const btnOverview = document.getElementById('btn-goto-overview');
+        
+                // 🔒 ตรวจสอบความปลอดภัย: ถ้าปุ่มเดินทางมาถึง DOM หน้าจอครบแล้ว ค่อยผูกคำสั่ง onclick
+                if (btnNext) btnNext.onclick = () => switchPage('form-next');
+                if (btnNow) btnNow.onclick = () => switchPage('form-now');
+                if (btnOverview) btnOverview.onclick = () => switchPage('overview');
+            }
+            
+            // 🟢 เคสงานบันทึกเวรล่วงหน้า (เดือนหน้า)
+            if (pageName === 'form-next') {
+                const btnBack = document.getElementById('btn-back');
+                const typeSelect = document.getElementById('swap-type');
+                const shiftSelect = document.getElementById('swap-shift-select');
+        
+                if (btnBack) btnBack.onclick = () => switchPage('home');
+                if (typeSelect) {
+                    typeSelect.onchange = function() {
+                        loadUserAvailableShifts('form-next');
+                    };
+                }
+                if (shiftSelect) {
+                    shiftSelect.onchange = function() {
+                        const submitBtn = document.getElementById('btn-submit-next');
+                        if (!submitBtn) return;
+                        if (this.value !== "") {
+                            submitBtn.disabled = false;
+                            submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-4 rounded-2xl shadow-lg transform active:scale-[0.99] transition-all flex items-center justify-center space-x-2";
+                        } else {
+                            submitBtn.disabled = true;
+                            submitBtn.className = "w-full bg-slate-300 text-slate-500 font-bold p-4 rounded-2xl cursor-not-allowed flex items-center justify-center space-x-2";
+                        }
+                    };
+                }
+            }
+        
+            // 🔵 เคสงานจัดการ/เปลี่ยนผลัดเวร (เดือนปัจจุบัน)
+            if (pageName === 'form-now') {
+                // 🔥 [สั่งงานเพิ่ม] ควบระบบคำนวณพ่นเดือน Dynamic ทันทีที่เปิดหน้าฟอร์มนี้เข้ามา
+                setupDynamicMonths();
+                
+                const btnBack = document.getElementById('btn-back');
+                const typeSelect = document.getElementById('swap-type');
+                
+                if (btnBack) btnBack.onclick = () => switchPage('home');
+                if (typeSelect) {
+                    typeSelect.onchange = function() {
+                        loadUserAvailableShifts('form-now');
+                    };
+                }
+            }
+        
+            // 🟠 เคสหน้าจอภาพรวมตารางรวมเดือน (มินิปฏิทินจุดสี)
+            if (pageName === 'overview') {
+                const btnBackHome = document.getElementById('btn-back-home');
+                if (btnBackHome) btnBackHome.onclick = () => switchPage('home');
+                
+                // รันฟังก์ชันดึงฐานข้อมูลภาพรวมมาเรนเดอร์จุดสี
+                fetchOverviewDataAndRender();
+                
+                // ผูกสิทธิ์แท็บเม็ดยา 3 ประเภทเวร
+                const tabs = document.querySelectorAll('.tab-filter');
+                if (tabs.length > 0) {
+                    tabs.forEach(tab => {
+                        tab.onclick = function() {
+                            tabs.forEach(t => {
+                                t.className = "tab-filter text-slate-600 font-medium py-2.5 px-1 rounded-xl text-xs text-center transition-all duration-150";
+                            });
+                            this.className = "tab-filter bg-white text-indigo-700 font-bold py-2.5 px-1 rounded-xl text-xs text-center shadow-sm transition-all duration-150";
+                            renderCalendarGrid(this.innerText.trim());
+                        };
+                    });
+                }
+            }
+        }
+
+        // -------------------------------------------------------------
+        // 🛠️ คลังฟังก์ชันเชื่อมต่อสคริปต์หลังบ้าน (Core Integration Functions)
+        // -------------------------------------------------------------
+        
+        // 1. ฟังก์ชันกวาดข้อมูลคิวเวรจากตารางชีท (ใช้ร่วมกันทั้งเดือนปัจจุบันและเดือนหน้า)
+        function loadUserAvailableShifts(mode) {
+            const monthSelect = document.getElementById('swap-month');
+            const month = monthSelect.value;
+            const monthText = (mode === 'form-next') ? "เดือนถัดไป" : monthSelect.options[monthSelect.selectedIndex].text;
+            
+            const type = document.getElementById('swap-type').value;
+            const sSelect = document.getElementById('swap-shift-select');
+            const subSelect = document.getElementById('swap-substitute');
+
+            if (!type) {
+                sSelect.innerHTML = '<option value="">-- กรุณาเลือกประเภทเวรก่อน --</option>';
+                sSelect.disabled = true;
+                return;
+            }
+
+            sSelect.innerHTML = "<option>⏳ กำลังกวาดฐานคิวเวรในระบบ...</option>";
+            sSelect.disabled = true;
+
+            // ยิง Fetch จัดส่งพัสดุ Payload ไปหา GAS หลังบ้าน
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ 
+                    action: "getAvailableShifts", 
+                    sheetName: type,                    
+                    targetMonth: month,
+                    group: myGroup
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const shiftsList = (data && data.shifts) ? data.shifts : data;
+                sSelect.innerHTML = '<option value="">-- เลือกรายการวันปฏิบัติงานในตาราง --</option>';
+                
+                if (!Array.isArray(shiftsList) || shiftsList.length === 0) {
+                    sSelect.innerHTML = '<option value="">❌ เดือนนี้ไม่มีข้อมูลเวรประเภทนี้ในระบบ</option>';
+                    return;
+                }
+
+                shiftsList.forEach(item => {
+                    let opt = document.createElement('option');
+                    opt.value = item.row;         
+                    opt.innerText = item.display; 
+                    sSelect.appendChild(opt);
+                });
+                sSelect.disabled = false;
+
+                // ผูกเหตุการณ์: เมื่อกดคลิกเลือกเวรเดิมในช่อง 3 ค่อยส่งไม้ต่อให้ช่อง 4 ทำงานต่ออย่างเป็นระบบ
+                sSelect.onchange = function() {
+                    unlockAndLoadSubstitute(monthText, this.options[this.selectedIndex].text);
+                };
+            })
+            .catch(err => {
+                sSelect.innerHTML = `<option value="">❌ ระบบขัดข้อง: ${err.message}</option>`;
+            });
+        }
+
+        // 2. ฟังก์ชันปลดล็อกช่องที่ 4 + ดักจับสกัดรายชื่อซ้ำด้วยการบดขยี้เว้นวรรค
+        function unlockAndLoadSubstitute(monthText, selectedShiftText) {
+            const subSelect = document.getElementById('swap-substitute');
+            if (!subSelect) return; // หากเป็นฟอร์มเดือนหน้าที่ซ่อนค่าไว้ ให้ผ่านลอจิกนี้ไปได้เลย
+            
+            if (!selectedShiftText || selectedShiftText.includes("-- เลือกรายการวันปฏิบัติงาน")) {
+                subSelect.innerHTML = '<option value="">-- กรุณาเลือกรายการวันปฏิบัติงานในข้อ 3 ก่อน --</option>';
+                subSelect.disabled = true;
+                return;
+            }
+
+            // มาตรการล็อกช่อง 4 อัตโนมัติหากหน้าเว็บสลัดไปเจอเคส "เดือนถัดไป"
+            if (monthText.indexOf("เดือนถัดไป") !== -1) {
+                subSelect.innerHTML = '<option value="**ขึ้นปฏิบัติงานเอง**">**ขึ้นปฏิบัติงานเอง**</option>';
+                subSelect.disabled = true;
+                return;
+            }
+
+            subSelect.disabled = true;
+            subSelect.innerHTML = "<option>⏳ กำลังดึงรายชื่อเฉพาะในกลุ่มงาน...</option>";
+
+            let compareOriginalName = ""; 
+            if (selectedShiftText.includes(" - ")) {
+                let originalStaffName = selectedShiftText.split(" - ")[1].trim();
+                // 🔒 บดขยี้เว้นวรรคทุกจุดของชื่อเจ้าของเวรเดิม ป้องกันบั๊กเคาะวรรคสั้นยาวไม่เท่ากันใน Sheet
+                compareOriginalName = originalStaffName.replace(/\s+/g, '');
+            }
+
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getStaffNamesList", group: myGroup })
+            })
+            .then(res => res.json())
+            .then(data => {
+                subSelect.innerHTML = '<option value="">-- เลือกชื่อผู้ปฏิบัติงานแทน --</option>';
+                
+                // 1. เพิ่มตัวเลือกขึ้่นเองไว้บนสุดเสมอเพื่อความสะดวกตามหน้างานของอาจารย์
+                let defaultOpt = document.createElement('option');
+                defaultOpt.value = "**ขึ้นปฏิบัติงานเอง**";
+                defaultOpt.innerText = "**ขึ้นปฏิบัติงานเอง**";
+                subSelect.appendChild(defaultOpt);
+
+                // 2. ลูปรายชื่อคนในแผนกที่ดึงมาจากคลังชีท name_position
+                data.names.forEach(name => {
+                    if (!name) return;
+                    const cleanName = name.trim();
+                    const compareCleanName = cleanName.replace(/\s+/g, ''); 
+                    
+                    // สั่งคัดกรอง: รายชื่อที่จะแสดงต้องไม่ชนกับชื่อเดิมที่ครองเวรนั้นอยู่เด็ดขาด
+                    if (compareCleanName !== compareOriginalName) { 
+                        let opt = document.createElement('option');
+                        opt.value = cleanName;
+                        opt.innerText = cleanName;
+                        subSelect.appendChild(opt);
+                    }
+                });
+                subSelect.disabled = false; 
+            })
+            .catch(err => {
+                subSelect.innerHTML = `<option value="">❌ โหลดรายชื่อล้มเหลว: ${err.message}</option>`;
+            });
+        }
+
+        // 3. ฟังก์ชันภาพรวม: โฮสต์ขอดึงคลังเวรดิบทั้งเดือนมากักเก็บไว้ในหน่วยความจำ (Cache)
+        function fetchOverviewDataAndRender() {
+            const mSelect = document.getElementById('overview-month');
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '<div class="col-span-7 py-6 text-slate-400 text-xs animate-pulse">⏳ กำลังเชื่อมต่อคลังตารางรวมเดือน...</div>';
+            
+            // ยิง Fetch ดึงข้อมูลประมวลผลตารางรวมเดือนรอบเดียวจบ
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "getAllMonthlyShifts", targetMonth: mSelect.value, group: myGroup })
+            })
+            .then(res => res.json())
+            .then(data => {
+                allShiftsCache = data.shifts || []; // บันทึกข้อมูลใส่ตู้ Cache หน้าบ้าน
+                renderCalendarGrid("เช้าบ่ายดึก"); // วาดปฏิทินปักหมุดจุดสีโดยเริ่มต้นที่เวรหลักก่อน
+            })
+            .catch(err => {
+                grid.innerHTML = `<div class="col-span-7 py-4 text-xs text-rose-500">❌ โหลดคลังตารางพลาด: ${err.message}</div>`;
+            });
+
+            mSelect.onchange = fetchOverviewDataAndRender; // สั่งโหลดซ้ำหากมีการขยับเปลี่ยนเดือนส่องดู
+        }
+
+        // 4. ฟังก์ชันภาพรวม: เครื่องยนต์คำนวณวันและวาดจุดสีลงช่องมินิปฏิทินประจำเดือน
+        function renderCalendarGrid(selectedType) {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = ""; // เคลียร์ปฏิทินเก่า
+            
+            // วาดบล็อกช่องวันที่จำลอง 1-31 (อาจารย์สามารถขยายโลจิกคำนวณวันว่าง/วันเริ่มต้นของเดือนเพิ่มตรงนี้ได้ครับ)
+            for (let day = 1; day <= 31; day++) {
+                let cell = document.createElement('div');
+                cell.className = "py-2 bg-slate-50 hover:bg-slate-200/50 rounded-xl cursor-pointer transition-all flex flex-col justify-between h-11 border border-slate-100/40 relative";
+                cell.innerHTML = `<span>${day}</span>`;
+                
+                // 🔍 สแกนควานหาในตู้ Cache: เช็คว่าวันที่ลูปนี้ มีคิวเวรประเภทที่เลือกอยู่หรือไม่
+                let hasShift = allShiftsCache.some(item => {
+                    // ลอจิกแมปพิกัดข้อความวันที่ เช่น "1 พฤษภาคม" ค้นหาคำว่าวันนั้นๆ
+                    let cleanDisplay = item.display.replace(/\s+/g, '');
+                    return cleanDisplay.startsWith(day + "พฤษภาคม") && item.type === selectedType;
+                });
+
+                if (hasShift) {
+                    // กำหนดสีของจุดไฟปฏิทินตามเงื่อนไขคู่สีเวรของอาจารย์
+                    let dotColor = "bg-amber-400"; // เช้าบ่ายดึก
+                    if (selectedType === "บ่ายน้อย") dotColor = "bg-blue-500";
+                    if (selectedType === "SMC") dotColor = "bg-purple-500";
+                    
+                    cell.innerHTML += `<div class="w-1.5 h-1.5 ${dotColor} rounded-full mx-auto mb-0.5"></div>`;
+                }
+
+                // ผูกอีเวนต์: เมื่อเจ้าหน้าที่เอานิ้วจิ้มที่ตัวเลขวัน ให้กางรายชื่อเวรด้านล่างออกมาทันที
+                cell.onclick = () => showDailyRoster(day);
+                grid.appendChild(cell);
+            }
+        }
+
+        // 5. ฟังก์ชันภาพรวม: กางรายชื่อเวร เช้า บ่าย ดึก ประจำวันที่นิ้วโป้งจิ้มเลือก
+        function showDailyRoster(day) {
+            document.getElementById('selected-date-title').innerText = `📋 รายการเวรประจำวันที่ ${day} พฤษภาคม 2569`;
+            const listContainer = document.getElementById('daily-staff-list');
+            listContainer.innerHTML = "";
+
+            // กรองหาแถวเวรทั้งหมดในตู้ Cache ที่ตรงกับวันที่โดนเคาะเลือก
+            let targetShifts = allShiftsCache.filter(item => {
+                let cleanDisplay = item.display.replace(/\s+/g, '');
+                return cleanDisplay.startsWith(day + "พฤษภาคม");
+            });
+
+            if (targetShifts.length === 0) {
+                listContainer.innerHTML = '<div class="text-center py-4 text-slate-400 font-normal">🌴 วันนี้ไม่มีภาระงานเวรนอกเวลาในระบบ</div>';
+                return;
+            }
+
+            // ลูปสาดรายชื่อลงบอร์ดด้านล่างอย่างเป็นระเบียบตามเฉดสีเวร
+            targetShifts.forEach(item => {
+                let badgeColor = "bg-slate-100 text-slate-700";
+                if (item.type === "ชบด") badgeColor = "bg-amber-50 text-amber-800 border border-amber-100";
+                if (item.type === "บ่ายน้อย") badgeColor = "bg-blue-50 text-blue-800 border border-blue-100";
+                if (item.type === "SMC") badgeColor = "bg-purple-50 text-purple-800 border border-purple-100";
+
+                let rowDiv = document.createElement('div');
+                rowDiv.className = `p-3 rounded-xl ${badgeColor} font-medium flex items-center justify-between shadow-sm`;
+                rowDiv.innerHTML = `<span>${item.display}</span> <span class="text-[9px] uppercase tracking-wider font-bold opacity-60">${item.type}</span>`;
+                listContainer.appendChild(rowDiv);
+            });
+        }
+        // =======================================================
+        // 📅 ฟังก์ชันคำนวณเดือนปัจจุบันและเดือนถัดไปแบบอัตโนมัติ (Dynamic Month Setup)
+        // =======================================================
+        function setupDynamicMonths() {
+            const monthSelect = document.getElementById('swap-month');
+            if (!monthSelect) return; // ป้องกันบั๊ก Null หากหน้าจอเดินทางมาไม่ถึง
+        
+            const thMonths = [
+                "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+                "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+            ];
+        
+            // 1. ดึงวันเวลาปัจจุบันจากระบบเครื่องผู้ใช้งาน
+            const now = new Date();
+            const currentMonthIdx = now.getMonth(); // 0 = ม.ค. , 11 = ธ.ค.
+            const currentYearBE = now.getFullYear() + 543; // แปลง ค.ศ. เป็น พ.ศ.
+        
+            // 2. คำนวณหาเดือนถัดไป (ดักบั๊กกรณีข้ามปี: ถ้าปัจจุบันเป็น ธ.ค. เดือนถัดไปจะเป็น ม.ค. ปีถัดไป)
+            let nextMonthIdx = currentMonthIdx + 1;
+            let nextYearBE = currentYearBE;
+            if (nextMonthIdx > 11) {
+                nextMonthIdx = 0;
+                nextYearBE += 1;
+            }
+        
+            // 3. จัดแจงโครงสร้าง Option ประกอบร่างภาษาไทย
+            const currentMonthText = `${thMonths[currentMonthIdx]}`;
+            const currentMonthDisplay = `${thMonths[currentMonthIdx]} ${currentYearBE} (เดือนปัจจุบัน)`;
+        
+            const nextMonthText = `${thMonths[nextMonthIdx]}`;
+            const nextMonthDisplay = `${thMonths[nextMonthIdx]} ${nextYearBE} (เดือนถัดไป)`;
+        
+            // 4. พ่นข้อมูลลงสู่ Dropdown บนหน้าฟอร์ม
+            monthSelect.innerHTML = `
+                <option value="${currentMonthText}" selected>${currentMonthDisplay}</option>
+                <option value="${nextMonthText}">${nextMonthDisplay}</option>
+            `;
+        }
+    </script>
+</body>
+</html>
