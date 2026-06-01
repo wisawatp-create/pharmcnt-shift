@@ -37,25 +37,54 @@
             checkUrlCredentials();
         });
 
-   // 🔍 ฟังก์ชันแกะรอยตรวจสอบตัวตนจาก URL Parameter (ฉบับอัปเกรดระบบตรวจจับการลงทะเบียน)
-function checkUrlCredentials() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const uid = urlParams.get('uid');
-    const name = urlParams.get('name');
-
-    if (uid && name) {
-        myLineUserId = uid;
-        myFullName = decodeURIComponent(name); // ชื่อเล่น/ชื่อตั้งใน LINE จังหวะแรก
-        
-        console.log("🟢 ได้รับข้อมูลจาก LINE OAuth สำเร็จ:", myLineUserId);
-
-        // 🚨 [จุดแก้ไขสำคัญ] เปลี่ยนจากตรวจสอบกลุ่มงานเฉยๆ เป็นการ "ตรวจบัตรคิวลงทะเบียน"
-        checkUserRegistrationStatus(myLineUserId);
-    } else {
-        // 🚪 เคสเข้ามาหน้าเว็บตัวเปล่า: ดีดส่งไปหน้าต่างล็อกอินสีเขียวของ LINE
-        redirectToLineLogin();
+    // 🔍 ฟังก์ชันแกะรอยตรวจสอบตัวตน (เวอร์ชันล้าง URL ป้องกันการวนลูปกลับมาหน้าเดิม)
+    function checkUrlCredentials() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const uid = urlParams.get('uid');
+        const name = urlParams.get('name');
+    
+        if (uid && name) {
+            // 1. นำข้อมูลมาฝังลงในกล่องตัวแปรส่วนกลาง (Global State) ทันที
+            myLineUserId = uid;
+            myFullName = decodeURIComponent(name);
+            
+            console.log("🟢 LINE Login สำเร็จ เก็บข้อมูลเข้าเซสชันแล้ว:", myLineUserId);
+    
+            // 🔥 [จุดวิกฤตที่ต้องเพิ่ม] คำสั่งล้างป้ายชื่อห้อยท้าย URL ทิ้งทันที!
+            // คำสั่งนี้จะลบ ?uid=xxxx&name=xxxx ออกไปจากสายตาผู้ใช้บนเบราว์เซอร์มือถือ 
+            // โดยที่หน้าเว็บ "จะไม่รีเฟรชซ้ำ" ทำให้หน้าเว็บกลับมาสะอาดเป็นลิงก์ปกติ ป้องกันบั๊กวนลูป
+            if (window.history.replaceState) {
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+                console.log("🧼 ล้างแถบ URL Parameters ให้สะอาดเรียบร้อยป้องกันบั๊ก Loop");
+            }
+    
+            // 2. เดินหน้าแสกนหากลุ่มงานใน Sheet ต่อเพื่อเปิดหน้า home.html ตามปกติ
+            fetchUserGroupFromBackend(myFullName);
+    
+        } else {
+            // 🚪 เคสเข้ามาหน้าเว็บตัวเปล่า (หรือหลังจากการรีเฟรชที่ล้าง URL ไปแล้ว)
+            // เพื่อไม่ให้ระบบดีดกลับไปหน้า LINE ตลอดเวลาหลังจากล็อกอินสำเร็จแล้ว 
+            // เราต้องเช็คก่อนว่าในระบบ "มีค่า User ID ฝังอยู่เดิมใน Memory แล้วหรือยัง"
+            if (myLineUserId && myLineUserId !== "") {
+                console.log("✅ ผู้ใช้ล็อกอินอยู่แล้วในเซสชัน เปิดสิทธิ์ใช้งานต่อได้เลย");
+                switchPage('home');
+            } else {
+                // 🛠️ ตรวจสอบโหมดทดสอบในเครื่องคอมพิวเตอร์ของอาจารย์ (Bypass สำหรับ Admin)
+                if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") {
+                    console.log("🛠️ [Admin Mode] จำลองข้อมูลล็อกอินบนเครื่องคอมพิวเตอร์");
+                    myLineUserId = "U_ADMIN_TEST_123456";
+                    myFullName = "นายวิศรุต ปาริยะประเสริฐ";
+                    myGroup = "เภสัชกร";
+                    switchPage('home');
+                } else {
+                    // บังคับเด้งไปหน้าจอเขียวของ LINE เฉพาะคนที่ไม่มีข้อมูลจริง ๆ เท่านั้น
+                    console.log("🚪 บัญชีว่างเปล่า บังคับเปลี่ยนเส้นทางเข้าสู่ประตู LINE Login");
+                    redirectToLineLogin();
+                }
+            }
+        }
     }
-}
 
 // 🎯 [ฟังก์ชันใหม่] ยิงไปเช็คใน Sheet ว่า LINE User ID นี้เคยลงทะเบียนไว้หรือยัง?
 function checkUserRegistrationStatus(userId) {
