@@ -40,48 +40,6 @@
     // 🔍 ฟังก์ชันแกะรอยตรวจสอบตัวตน (เวอร์ชันล้าง URL ป้องกันการวนลูปกลับมาหน้าเดิม)
     function checkUrlCredentials() {
         const urlParams = new URLSearchParams(window.location.search);
-        <!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดการเวร PharmCNT</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <style>
-        /* ตกแต่งฟอนต์พื้นฐานเพื่อให้แสดงผลภาษาไทยได้อย่างละมุนบนหน้าจอมือถือ */
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
-        body { font-family: 'Sarabun', sans-serif; }
-    </style>
-</head>
-<body class="bg-slate-100 min-h-screen">
-
-    <div id="app-container" class="max-w-md mx-auto min-h-screen bg-slate-50 relative shadow-2xl shadow-slate-300/50">
-        <div class="flex items-center justify-center min-h-screen p-4 text-slate-500 text-sm">
-            ⏳ กำลังเตรียมความพร้อมระบบ PharmCNT...
-        </div>
-    </div>
-
-    <script>
-        // 🔒 [จุดตั้งค่า] อาจารย์นำ URL ของ Google Apps Script Web App มาใส่ตรงนี้ครับ
-        const CLIENT_ID = "2010181979"; // ไอดี LINE channel ID
-        const REDIRECT_URI = GAS_URL ;//"https://wisawatp-create.github.io/pharmcnt-shift/index.html"; // หน้าเว็บของอาจารย์
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxj4l0Lou5cV1P9D0eZRv12oAsWW9Fx3OQNv7ZkmSUhjskrXx3H_xCesQyFWSQ7XQsQ/exec";
-
-        // ตัวแปรส่วนกลาง (Global State) สำหรับผูกตัวตนเจ้าหน้าที่ผ่านไลน์ด่านแรก
-        let myLineUserId = ""; // 🎯 กล่องใหม่สำหรับเก็บ LINE User ID เฉพาะบุคคล
-        let myGroup = "";      // จะถูกเติมค่าโดยอัตโนมัติหลังสแกนกลุ่มงานเสร็จ
-        let myFullName = "";   // จะถูกเติมค่าโดยอัตโนมัติหลัง LINE Login สำเร็จ
-        let allShiftsCache = []; // หน่วยความจำสำรองสำหรับเก็บตารางเวรทั้งเดือนเพื่อใช้ในหน้าภาพรวม
-
-        // 🚀 สั่งเปิดระบบให้โหลดหน้าแรก (home.html) ทันทีที่เปิดแอปพลิเคชัน
-        window.addEventListener('DOMContentLoaded', () => {
-            checkUrlCredentials();
-        });
-
-    // 🔍 ฟังก์ชันแกะรอยตรวจสอบตัวตน (เวอร์ชันล้าง URL ป้องกันการวนลูปกลับมาหน้าเดิม)
-    function checkUrlCredentials() {
-        const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code'); // LINE จะส่ง ?code=xxx กลับมาที่หน้าเว็บ GitHub
 
         // เคสที่ A: ตรวจพบรหัส code จาก LINE วิ่งเข้ามาที่หน้าเว็บ GitHub
@@ -108,6 +66,49 @@
             }
         }
     }
+
+    // =================================================================
+    // 📥 3. ฟังก์ชันยิง POST ไปแลกเปลี่ยนรหัสและตรวจเช็คประวัติ (ตรงตัวกับ Code.gs)
+    // =================================================================
+    function exchangeCodeForLineId(lineCode) {
+        const container = document.getElementById('app-container');
+        container.innerHTML = '<div class="flex items-center justify-center min-h-screen text-slate-500 text-sm">⏳ กำลังตรวจสอบสิทธิ์ล็อกอินผ่าน LINE...</div>';
+
+        // 🎯 สั่งยิง POST ไปหาเคส "getLineIdFromCode" ของอาจารย์
+        fetch(GAS_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "getLineIdFromCode",
+                code: lineCode,
+                redirectUri: REDIRECT_URI
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // โครงสร้างคืนค่าควรส่งกลับมาบอกสถานะ เช่น { status: "registered/not_registered", userId: "...", fullName: "...", group: "..." }
+            if (data.status === "registered") {
+                // 🎉 เป็นพนักงานเก่าที่เคยผูกข้อมูลไว้แล้ว นำค่าจากชีทลงหน่วยความจำแอป
+                myLineUserId = data.userId;
+                myFullName = data.fullName;
+                myGroup = data.group;
+                
+                switchPage('home'); // สั่งเปิดหน้าแดชบอร์ดหลักทันที
+                
+            } else if (data.status === "not_registered") {
+                // 📝 เป็นพนักงานใหม่ ตรวจไม่พบข้อมูลในตาราง ให้ดีดไปหน้าลงทะเบียนผูกรหัส
+                myLineUserId = data.userId; // เก็บ ID รอไว้บันทึก
+                
+                switchPage('register'); // เปิดหน้ากรอกชื่อ-นามสกุลจริง
+            } else {
+                throw new Error(data.message || "การยืนยันตัวตนผิดพลาด");
+            }
+        })
+        .catch(err => {
+            container.innerHTML = `<div class="p-6 text-center text-sm text-rose-500">❌ ข้อผิดพลาดด่านล็อกอิน: ${err.message}</div>`;
+        });
+    }
+         
+
 
 // 🎯 [ฟังก์ชันใหม่] ยิงไปเช็คใน Sheet ว่า LINE User ID นี้เคยลงทะเบียนไว้หรือยัง?
 function checkUserRegistrationStatus(userId) {
